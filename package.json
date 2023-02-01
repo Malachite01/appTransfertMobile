@@ -22,6 +22,8 @@
     "electron": "^22.0.2"
   },
   "dependencies": {
+    "adbkit": "^2.11.1",
+    "child_process": "^1.0.2",
     "usb": "^2.6.0"
   }
 }

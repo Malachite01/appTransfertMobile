@@ -32,10 +32,10 @@ body {
     padding: 15px; 
     border-radius: 50%;
     filter: opacity(30%);
-    animation: usbBeat 2s ease-in-out infinite;
+    animation: imgBeat 2s ease-in-out infinite;
 }
 
-@keyframes usbBeat {
+@keyframes imgBeat {
     0% {
         width: 150px;
     }
@@ -47,8 +47,9 @@ body {
     }
 }
 
-#beat {
+#iddleWave {
     position: absolute;
+    pointer-events: none;
     z-index: -1;
     top: 50%;
     left: 50%;
@@ -57,11 +58,11 @@ body {
     height: 0px;
     background-color: lightgray;
     border-radius: 100%;
-    animation: beat 2s ease-in-out infinite;
+    animation: wave 2s ease-in-out infinite;
     opacity: 0%;
 }
 
-#beat::before {
+#iddleWave::before {
     content: "";
     position: absolute;
     top: 50%;
@@ -73,7 +74,7 @@ body {
     border-radius: 100%;
 }
 
-@keyframes beat {
+@keyframes wave {
     0% {
         width: 0px;
         height: 0px;
@@ -107,4 +108,67 @@ body {
     bottom: 25px;
     left: 50%;
     transform: translate(-50%, -50%);
+    color: grey;
 }
+
+#adb-not-installed {
+    display: none;
+}
+
+#adbWave {
+    position: absolute;
+    pointer-events: none;
+    z-index: -1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0px;
+    height: 0px;
+    background-color: rgb(103, 234, 127);
+    border-radius: 100%;
+    animation: wave 2s ease-in-out infinite;
+    opacity: 0%;
+}
+
+#adbWave::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 175px;
+    height: 175px;
+    background-color: var(--couleurBody);
+    border-radius: 100%;
+}
+
+#imgWait {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    background-color: lightgray;
+    width: 150px;
+    padding: 15px; 
+    border-radius: 50%;
+    filter: opacity(30%);
+    animation: imgBeatRotate 2s ease-in-out infinite;
+    transition: .6s;
+}
+
+@keyframes imgBeatRotate {
+    0% {
+        width: 150px;
+    }
+    15% {
+        width: 175px;
+    }
+    35% {
+        width: 150px;
+    }
+    100% {
+        transform: translate(-50%, -50%) rotateZ(360deg);
+    }
+}
+

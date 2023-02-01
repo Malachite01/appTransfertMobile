@@ -1,6 +1,7 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-const usbDetection = require('./usb-detection');
+const adbDetection = require('./adb-detection.js');
+const usbDetection = require('./usb-detection.js');
 
 //Requete des privileges administrateur
 if (!app.requestSingleInstanceLock()) {
@@ -19,9 +20,6 @@ function createWindow () {
   win.loadFile(path.join(__dirname, '../index.html'))
 }
 
-// Ecouter les nouveaux périphériques USB qui sont connectés
-usbDetection.detectDevice();
-
 // Lorsque l'application est prête, créer une fenêtre
 app.whenReady().then(() => {
   createWindow()
@@ -32,6 +30,29 @@ app.whenReady().then(() => {
     }
   })
 })
+
+
+//vérification de l'installation de adb
+var isAdbInstalled = adbDetection.checkAdb();
+if(!isAdbInstalled) {
+  adbDetection.installAdb();
+} else {
+  //liste les appareils connectés et ecoute connection déconnection
+  setInterval(function(){ 
+    usbDetection.trackDevices();   
+  }, 100);
+}
+
+//Variables globales étant transmise vers renderer.js
+var mainProcessVars = {
+  isAdbInstalled: isAdbInstalled
+}
+
+// Ecoute si jamais le renderer process envoie une requête pour récupérer une variable
+ipcMain.on('get-variable', (event, arg) => {
+  // Renvoie la variable demandée
+  event.sender.send('get-variable-response', mainProcessVars[arg]);
+});
 
 // Si toutes les fenêtres sont fermées, ferme l'application (sauf sur Mac où le comportement est différent)
 app.on('window-all-closed', () => {

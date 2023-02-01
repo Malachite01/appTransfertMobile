@@ -1,13 +1,21 @@
-// This script will run in the renderer process
+const wrapperIddle = document.getElementById('wrapper-iddle');
+const wrapperAdbNotInstalled = document.getElementById('adb-not-installed');
+var receivedAdbInstalled;
 
-// You can use it to handle the logic related to the GUI of your application
-// and communicate with the main process to access the application's features 
-// that are not available in the renderer process
-
-// You can also use it to add event listeners to the elements in your HTML
-
-// For example, you can add an event listener to a button to handle clicks
-// const button = document.getElementById('my-button');
-// button.addEventListener('click', () => {
-//     console.log('Button clicked');
-// });
+window.addEventListener('DOMContentLoaded', () => {
+    // Envoie un message au main process pour récupérer la variable isAdbInstalled
+    window.ipcRenderer.send('get-variable', 'isAdbInstalled');
+    // Ecoute la réponse du main process
+    window.ipcRenderer.on('get-variable-response', (event, arg) => {
+        receivedAdbInstalled = arg;
+    });
+    
+    //Affiche le bon wrapper en fonction de la valeur de receivedAdbInstalled
+    if(!receivedAdbInstalled) {
+        wrapperAdbNotInstalled.style.display = 'block';
+        wrapperIddle.style.display = 'none';
+    } else {
+        wrapperAdbNotInstalled.style.display = 'none';
+        wrapperIddle.style.display = 'block';
+    }
+});
