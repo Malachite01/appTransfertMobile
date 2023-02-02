@@ -28,6 +28,7 @@ body {
     transform: translate(-50%, -50%);
     pointer-events: none;
     background-color: lightgray;
+    box-shadow: rgba(41, 40, 40, 0.878) 0px 48px 100px 0px;
     width: 150px;
     padding: 15px; 
     border-radius: 50%;
@@ -104,6 +105,7 @@ body {
 
 #txtUsb {
     position: absolute;
+    text-align: center;
     z-index: -1;
     bottom: 25px;
     left: 50%;
@@ -124,7 +126,7 @@ body {
     transform: translate(-50%, -50%);
     width: 0px;
     height: 0px;
-    background-color: rgb(103, 234, 127);
+    background-color: rgb(234, 217, 103);
     border-radius: 100%;
     animation: wave 2s ease-in-out infinite;
     opacity: 0%;
@@ -171,4 +173,3 @@ body {
         transform: translate(-50%, -50%) rotateZ(360deg);
     }
 }
-
