@@ -3,13 +3,14 @@ const wrapperAdbNotInstalled = document.getElementById('adb-not-installed');
 var receivedAdbInstalled;
 
 window.addEventListener('DOMContentLoaded', () => {
-    // Envoie un message au main process pour récupérer la variable isAdbInstalled
-    window.ipcRenderer.send('get-variable', 'isAdbInstalled');
-    // Ecoute la réponse du main process
-    window.ipcRenderer.on('get-variable-response', (event, arg) => {
+
+    //Requete de la variable isAdbInstalled
+    window.api.send('get-variable', 'isAdbInstalled');
+    //Reception de la variable isAdbInstalled
+    window.api.receive('get-variable-response', (arg) => {
         receivedAdbInstalled = arg;
     });
-    
+
     //Affiche le bon wrapper en fonction de la valeur de receivedAdbInstalled
     if(!receivedAdbInstalled) {
         wrapperAdbNotInstalled.style.display = 'block';
