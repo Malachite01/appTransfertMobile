@@ -47,9 +47,9 @@ adbDetection.checkAdb()
         mainProcessVars = {
           isAdbInstalled: isAdbInstalled
         }
-        // setInterval(function() {
-        //   usbDetection.trackDevices();
-        // }, 100);
+        setInterval(function() {
+          usbDetection.trackDevices();
+        }, 100);
       }
     }
   );
