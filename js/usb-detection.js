@@ -1,5 +1,5 @@
 const adbkit = require('adbkit');
-const client = adbkit.createClient();
+const client = adbkit.createClient({bin: 'C://adb/adb.exe'});
 
 function trackDevices() {
     client.listDevices()
