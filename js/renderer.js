@@ -13,16 +13,6 @@ window.api.receive('getAnswer', (arg) => {
     receivedAdbInstalled = arg;
 });
 
-const button = document.getElementById('my-button');
-button.addEventListener('click', () => {
-    //Requete de la variable isAdbInstalled
-    window.api.send('getVariable', 'isAdbInstalled');
-    //Reception de la variable isAdbInstalled
-    window.api.receive('getAnswer', (arg) => {
-        receivedAdbInstalled = arg;
-    });
-});
-
 //Affiche le bon wrapper en fonction de la valeur de receivedAdbInstalled
 if(!receivedAdbInstalled) {
     wrapperIddle.style.display = 'none';
