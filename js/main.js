@@ -68,6 +68,9 @@ if (!mainProcessVars.isAdbInstalled) {
 } else {
   (idUpdateRendererVar ? clearInterval(idUpdateRendererVar) : "");
 }
+
+//?  _________________________
+//? |_____SEND_VARIABLES_____|
 // Ecoute si jamais le renderer process envoie une requête pour récupérer une variable
 ipcMain.on('getVariable', (event, arg) => {
   // Renvoie la variable demandée
