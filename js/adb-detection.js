@@ -6,14 +6,15 @@ function checkAdb() {
         terminal('C://adb/adb version', (error, stdout, stderr) => {
             if (error) {
                 //ADB n'est pas installé
-                console.log("ADB PAS INSTALLE");
                 resolve(false);
             } else {
                 //ADB est installé
-                console.log("ABD INSTALLE");
                 resolve(true);
             }
         });
+    })
+    .catch((error) => {
+        console.error(error);
     });
 }
 

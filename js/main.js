@@ -1,19 +1,21 @@
+//!  _________________________
+//! |_______VARIABLES________|
 const { app, BrowserWindow, ipcMain } = require('electron');
 let win;
-var mainProcessVars = {};
 const path = require('path');
 const adbDetection = require('./adb-detection.js');
 const usbDetection = require('./usb-detection.js');
-
-//Requete des privileges administrateur
-if (!app.requestSingleInstanceLock()) {
-  app.quit();
+//Variables globales nécessitant une transmission vers renderer.js
+var mainProcessVars = {
+  isAdbInstalled: false
 }
 
+//!  _________________________
+//! |_____INITIALISATION_____|
 function createWindow () {
   win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1200,
+    height: 700,
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -21,10 +23,8 @@ function createWindow () {
       preload: path.join(__dirname, './preload.js')
     }
   })
-
   win.loadFile(path.join(__dirname, '../index.html'))
 }
-
 // Lorsque l'application est prête, créer une fenêtre
 app.whenReady().then(() => {
   createWindow();
@@ -36,34 +36,49 @@ app.whenReady().then(() => {
   })
 })
 
+
+//!  _________________________
+//! |_________MAIN___________|
 //vérification de l'installation de adb
-var isAdbInstalled = null;
+let idUsbDetection;
 adbDetection.checkAdb()
   .then(
     function(isAdbInstalled) {
+      mainProcessVars.isAdbInstalled = isAdbInstalled;
       if (!isAdbInstalled) {
         return adbDetection.installAdb();
       } else {
-        mainProcessVars = {
-          isAdbInstalled: isAdbInstalled
-        }
-        setInterval(function() {
-          usbDetection.trackDevices();
-        }, 100);
+        idUsbDetection = setInterval(() => {usbDetection.trackDevices();}, 2000);
       }
     }
   );
 
-  //Variables globales nécessitant une transmission vers renderer.js
-  mainProcessVars = {
-    isAdbInstalled: isAdbInstalled
-  }
-  // Ecoute si jamais le renderer process envoie une requête pour récupérer une variable
-  ipcMain.on('getVariable', (event, arg) => {
-    // Renvoie la variable demandée
-    win.webContents.send('getAnswer', mainProcessVars[arg]);
-  });
+//Update isAdbInstalled pour changer le wrapper affiché par renderer.js
+function updateRendererVar() {
+  adbDetection.checkAdb()
+    .then(function(isAdbInstalled) {
+      mainProcessVars.isAdbInstalled = isAdbInstalled;
+    });
+}
 
+let idUpdateRendererVar;
+//si !isAdbInstalled, alors update toutes les 2 secondes, sinon on arrête la mise à jour
+if (!mainProcessVars.isAdbInstalled) {
+  idUpdateRendererVar = setInterval(() => {updateRendererVar();}, 2000);
+} else {
+  (idUpdateRendererVar ? clearInterval(idUpdateRendererVar) : "");
+}
+// Ecoute si jamais le renderer process envoie une requête pour récupérer une variable
+ipcMain.on('getVariable', (event, arg) => {
+  // Renvoie la variable demandée
+  win.webContents.send('getAnswer', mainProcessVars[arg]);
+});
+
+
+
+
+//!  _________________________
+//! |_________QUIT___________|
 // Si toutes les fenêtres sont fermées, ferme l'application (sauf sur Mac où le comportement est différent)
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
