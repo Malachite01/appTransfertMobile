@@ -2,14 +2,16 @@
 //! |_______VARIABLES________|
 const wrapperIddle = document.getElementById('wrapper-iddle');
 const wrapperAdbNotInstalled = document.getElementById('adb-not-installed');
+const wrapperFiles = document.getElementById('wrapper-files');
 var receivedAdbInstalled = false;
+var receivedDeviceId = null;
 
 
 //!  _________________________
 //! |_______FUNCTIONS________|
-function changeScreen(screen1, screen2) {
+function changeScreen(screen1, screen2,type) {
   screen1.style.display = 'none';
-  screen2.style.display = 'block';
+  screen2.style.display = type;
 }
 
 function getVariable(variableName) {
@@ -30,13 +32,24 @@ window.addEventListener('DOMContentLoaded', () => {
     getVariable('isAdbInstalled').then(result => {receivedAdbInstalled = result;});
     //Changement de wrapper
     if (receivedAdbInstalled) {
-      changeScreen(wrapperAdbNotInstalled, wrapperIddle);
+      changeScreen(wrapperAdbNotInstalled, wrapperIddle, 'block');
     } else {
-      changeScreen(wrapperIddle, wrapperAdbNotInstalled);
+      changeScreen(wrapperIddle, wrapperAdbNotInstalled, 'block');
     }
     //Stop MAJ si adb est installé pour ne pas surcharger le processeur
     if(receivedAdbInstalled) {
       (idUpdateRenderer ? clearInterval(idUpdateRenderer) : " ");
     }
-  }, 1000);
-});
+  }, 2000);
+  
+  setInterval(() => {
+    getVariable('deviceId').then(result => {receivedDeviceId = result;});
+    console.log(receivedDeviceId);
+    if (typeof receivedDeviceId === 'string' && receivedDeviceId.length > 0) {
+      (wrapperIddle.style.display == 'block' ? changeScreen(wrapperIddle, wrapperFiles, 'grid') : "");
+    } else {
+      (wrapperFiles.style.display == 'grid' ? changeScreen(wrapperFiles, wrapperIddle, 'block') : "");
+    }
+  }, 2000);
+
+  });

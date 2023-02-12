@@ -1,13 +1,16 @@
 //!  _________________________
 //! |_______VARIABLES________|
 const { app, BrowserWindow, ipcMain } = require('electron');
-let win;
 const path = require('path');
+const adbkit = require('adbkit');
+let win;
 const adbDetection = require('./adb-detection.js');
 const usbDetection = require('./usb-detection.js');
+
 //Variables globales nécessitant une transmission vers renderer.js
 var mainProcessVars = {
-  isAdbInstalled: false
+  isAdbInstalled: false,
+  deviceId: null
 }
 
 //!  _________________________
@@ -41,6 +44,7 @@ app.whenReady().then(() => {
 //! |_________MAIN___________|
 //vérification de l'installation de adb
 let idUsbDetection;
+let deviceId;
 adbDetection.checkAdb()
   .then(
     function(isAdbInstalled) {
@@ -48,7 +52,11 @@ adbDetection.checkAdb()
       if (!isAdbInstalled) {
         return adbDetection.installAdb();
       } else {
-        idUsbDetection = setInterval(() => {usbDetection.trackDevices();}, 2000);
+        //Création du client adb du main process
+        client = adbkit.createClient({bin: 'C://adb/adb.exe'});
+        //?  _________________________
+        //? |____DEVICE_DETECTION____|
+        idUsbDetection = setInterval(() => {usbDetection.trackDevices().then((id) => {deviceId = id;});}, 2000);
       }
     }
   );
@@ -62,7 +70,7 @@ function updateRendererVar() {
 }
 
 let idUpdateRendererVar;
-//si !isAdbInstalled, alors update toutes les 2 secondes, sinon on arrête la mise à jour
+//si !isAdbInstalled, alors update toutes les secondes, sinon on arrête la mise à jour
 if (!mainProcessVars.isAdbInstalled) {
   idUpdateRendererVar = setInterval(() => {updateRendererVar();}, 2000);
 } else {
@@ -77,9 +85,54 @@ ipcMain.on('getVariable', (event, arg) => {
   win.webContents.send('getAnswer', mainProcessVars[arg]);
 });
 
+//?  _________________________
+//? |_____BEGIN_DIR_LIST_____|
+var Promise = require('bluebird');
+let idDeviceDetection;
 
+idDeviceDetection = setInterval(() => {
+  if (mainProcessVars.isAdbInstalled == true) {
+    if (deviceId != null) {
+      mainProcessVars.deviceId = deviceId;
+      // Detection of files on the device
+      var client = adbkit.createClient({bin: 'C://adb/adb.exe'});
+      client.listDevices()
 
+      .then(function(devices) {
+      return Promise.map(devices, function(device) {
+        return client.readdir(device.id, '/sdcard')
+      
+        .then(function(files) {
+          var fileList = [];
+          files.forEach(function(file) {
+            fileList.push({
+              name: file.name,
+              type: file.isFile() ? 'file' : 'folder',
+              deviceId: device.id
+            });
+          });
 
+          // Call the callback function with the file list
+          onFilesReceived(fileList);
+        })
+      })
+      })
+
+      .catch(function(err) {
+        console.error('Something went wrong:', err.stack);
+      });
+    } else {
+      mainProcessVars.deviceId = null;
+    }
+  }
+}, 2000);
+
+// Callback function that receives the file list
+function onFilesReceived(fileList) {
+  console.log(fileList);
+  // Do something with the file list
+}
+  
 //!  _________________________
 //! |_________QUIT___________|
 // Si toutes les fenêtres sont fermées, ferme l'application (sauf sur Mac où le comportement est différent)

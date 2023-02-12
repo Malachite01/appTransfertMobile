@@ -18,9 +18,8 @@ body {
     display: grid;
 }
 
-/*! ------------------------ */
-/*! CONNECTION D'UN APPAREIL */
-/*! ------------------------ */
+/*!  ___________________________ */
+/*! |_CONNECTION D'UN APPAREIL_| */
 #imgUsb {
     position: absolute;
     top: 50%;
@@ -172,4 +171,169 @@ body {
     100% {
         transform: translate(-50%, -50%) rotateZ(360deg);
     }
+}
+
+/*!  ___________________________ */
+/*! |_________FICHIERS_________| */
+
+.logo-anim {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    background-color: lightgray;
+    box-shadow: rgba(41, 40, 40, 0.9) 0px 28px 65px 0px;
+    width: 150px;
+    padding: 15px; 
+    border-radius: 50%;
+    filter: opacity(30%);
+    animation: logoAnim .8s cubic-bezier(.6,.34,.67,.36) 1 forwards, imgBeat2 2s ease-in-out infinite;
+    transition: all .8s ease-in;
+}
+
+@keyframes logoAnim {
+    from {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 150px;
+    }
+    to {
+        top: 50px;
+        left: 50px;
+        transform: translate(-50%, -50%);
+        width: 40px;
+    }
+}
+
+@keyframes imgBeat2 {
+    0% {
+        width: 40;
+    }
+    15% {
+        width: 55px;
+    }
+    35% {
+        width: 40px;
+    }
+}
+
+#iddleWaveLogo {
+    position: absolute;
+    pointer-events: none;
+    z-index: -1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 0px;
+    height: 0px;
+    background-color: lightgray;
+    border-radius: 100%;
+    animation: logoAnim .8s cubic-bezier(.6,.34,.67,.36) 1 forwards, wave 2s ease-in-out infinite;
+    opacity: 0%;
+}
+
+#iddleWaveLogo::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 55px;
+    height: 55px;
+    background-color: var(--couleurBody);
+    border-radius: 100%;
+}
+
+@keyframes wave {
+    0% {
+        width: 0px;
+        height: 0px;
+        opacity: 100%;
+    }
+    50% {
+        width: 140px;
+        height: 140px;
+        opacity: 0%;
+    }
+}
+
+/* #wrapper-files {
+    
+    display: none;
+} */
+
+#wrapper-files {
+    display: none;
+}
+
+table {
+    margin-top: 200px;
+    padding-left: 20px;
+    padding-right: 20px;
+    border-spacing: 20px;
+}
+
+td {
+    text-align: center;
+}
+
+td:first-child {
+    border-left: solid 1px transparent;
+    border-top-left-radius: var(--globalRadius);
+    border-bottom-left-radius: var(--globalRadius);
+}
+
+td:last-child {
+    border-right: solid 1px transparent;
+    border-bottom-right-radius: var(--globalRadius);
+    border-top-right-radius: var(--globalRadius);
+}
+
+input[type=checkbox]{
+	height: 0;
+	width: 0;
+	visibility: hidden;
+}
+
+label {
+    margin-top: -20px;
+	position: relative;
+	cursor: pointer;
+	text-indent: -9999px;
+	width: 45px;
+	height: 18px;
+	background: rgb(178, 176, 176);
+    box-shadow: rgba(252, 252, 252, 0.138) 0px 30px 60px -12px inset, rgba(255, 255, 255, 0.193) 0px 18px 36px -18px inset;
+	display: block;
+	border-radius: 100px;
+    padding-bottom: 8px;
+}
+
+label:after {
+	content: '';
+	position: absolute;
+	top: 3px;
+	left: 5px;
+	width: 20px;
+	height: 20px;
+	background: #fff;
+    box-shadow: rgba(17, 17, 26, 0.1) 0px 2px 0px;
+	border-radius: 90px;
+	transition: 0.3s;
+}
+
+input:checked + label {
+	background: #398bd6;
+    box-shadow: rgba(252, 252, 252, 0.138) 0px 30px 60px -12px inset, rgba(255, 255, 255, 0.193) 0px 18px 36px -18px inset;
+}
+
+input:checked + label:after {
+	left: calc(100% - 5px);
+	transform: translateX(-100%);
+}
+
+label:active:after {
+	width: 25px;
 }

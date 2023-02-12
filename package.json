@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "adbkit": "^2.11.1",
+    "bluebird": "^3.7.2",
     "child_process": "^1.0.2",
     "usb": "^2.6.0"
   }
