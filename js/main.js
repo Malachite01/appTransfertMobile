@@ -6,11 +6,13 @@ const adbkit = require('adbkit');
 let win;
 const adbDetection = require('./adb-detection.js');
 const usbDetection = require('./usb-detection.js');
+var client = adbkit.createClient({bin: 'C://adb/adb.exe'});
 
 //Variables globales nécessitant une transmission vers renderer.js
 var mainProcessVars = {
   isAdbInstalled: false,
-  deviceId: null
+  deviceId: null,
+  fileList: []
 }
 
 //!  _________________________
@@ -78,14 +80,6 @@ if (!mainProcessVars.isAdbInstalled) {
 }
 
 //?  _________________________
-//? |_____SEND_VARIABLES_____|
-// Ecoute si jamais le renderer process envoie une requête pour récupérer une variable
-ipcMain.on('getVariable', (event, arg) => {
-  // Renvoie la variable demandée
-  win.webContents.send('getAnswer', mainProcessVars[arg]);
-});
-
-//?  _________________________
 //? |_____BEGIN_DIR_LIST_____|
 var Promise = require('bluebird');
 let idDeviceDetection;
@@ -94,32 +88,49 @@ idDeviceDetection = setInterval(() => {
   if (mainProcessVars.isAdbInstalled == true) {
     if (deviceId != null) {
       mainProcessVars.deviceId = deviceId;
-      // Detection of files on the device
-      var client = adbkit.createClient({bin: 'C://adb/adb.exe'});
+
+
       client.listDevices()
-
       .then(function(devices) {
-      return Promise.map(devices, function(device) {
-        return client.readdir(device.id, '/sdcard')
+        //Retour de la promesse d'appareils connectés
+        return Promise.map(devices, function(device) {
+          //Retour de la promesse de lecture du répertoire
+          return client.readdir(device.id, '/sdcard')
       
-        .then(function(files) {
-          var fileList = [];
-          files.forEach(function(file) {
-            fileList.push({
-              name: file.name,
-              type: file.isFile() ? 'file' : 'folder',
-              deviceId: device.id
+          .then(function(files) {
+            //Liste de tous les fichiers avec leur nom, type et deviceId
+            var fileList = [];
+            files.forEach(function(file) {
+              var fileType = 'unknown';
+              if (file.isFile()) {
+                if (file.name.endsWith('.jpg') || file.name.endsWith('.jpeg') || file.name.endsWith('.png') || 
+                file.name.endsWith('.gif') || file.name.endsWith('.bmp') || file.name.endsWith('.webp') || 
+                file.name.endsWith('.tiff') || file.name.endsWith('.cr2') || file.name.endsWith('.arw') || 
+                file.name.endsWith('.nef') || file.name.endsWith('.raw')) {
+                  fileType = 'image';
+                } else {
+                  fileType = 'file';
+                }
+              } else {
+                fileType = 'folder';
+              }
+              fileList.push({
+                name: file.name,
+                type: fileType,
+                lastModified: file.mtime,
+                size: file.size,
+                deviceId: device.id
+              });
             });
-          });
 
-          // Call the callback function with the file list
-          onFilesReceived(fileList);
+            // Call the callback function with the file list
+            onFilesReceived(fileList);
+          })
         })
-      })
       })
 
       .catch(function(err) {
-        console.error('Something went wrong:', err.stack);
+        console.error('Il y a eu un problème :', err.stack);
       });
     } else {
       mainProcessVars.deviceId = null;
@@ -127,12 +138,24 @@ idDeviceDetection = setInterval(() => {
   }
 }, 2000);
 
-// Callback function that receives the file list
 function onFilesReceived(fileList) {
-  console.log(fileList);
-  // Do something with the file list
+  fileList.sort(function(elementA, elementB) {
+    var nomFichier1 = elementA.name.toUpperCase();
+    var nomFichier2 = elementB.name.toUpperCase();
+    return (nomFichier1 < nomFichier2 ? (nomFichier1 == nomFichier2 ? 0:-1) : (nomFichier1 == nomFichier2 ? 0:1));
+  });
+  mainProcessVars.fileList = fileList;
+  // console.log(mainProcessVars.fileList);
 }
-  
+
+//?  _________________________
+//? |_____SEND_VARIABLES_____|
+// Ecoute si jamais le renderer process envoie une requête pour récupérer une variable
+ipcMain.on('getVariable', (event, arg) => {
+  // Renvoie la variable demandée
+  win.webContents.send('getAnswer', mainProcessVars[arg]);
+});
+
 //!  _________________________
 //! |_________QUIT___________|
 // Si toutes les fenêtres sont fermées, ferme l'application (sauf sur Mac où le comportement est différent)

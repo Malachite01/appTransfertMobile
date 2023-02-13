@@ -44,12 +44,12 @@ window.addEventListener('DOMContentLoaded', () => {
   
   setInterval(() => {
     getVariable('deviceId').then(result => {receivedDeviceId = result;});
-    console.log(receivedDeviceId);
     if (typeof receivedDeviceId === 'string' && receivedDeviceId.length > 0) {
       (wrapperIddle.style.display == 'block' ? changeScreen(wrapperIddle, wrapperFiles, 'grid') : "");
     } else {
       (wrapperFiles.style.display == 'grid' ? changeScreen(wrapperFiles, wrapperIddle, 'block') : "");
     }
+    getVariable('fileList').then(result => {console.log(result);});
   }, 2000);
 
   });

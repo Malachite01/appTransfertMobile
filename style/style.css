@@ -116,6 +116,37 @@ body {
     display: none;
 }
 
+#imgWait {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    background-color: lightgray;
+    width: 150px;
+    padding: 15px; 
+    border-radius: 50%;
+    filter: opacity(30%);
+    animation: imgBeatRotate 2s ease-in-out infinite;
+    box-shadow: rgba(41, 40, 40, 0.878) 0px 48px 100px 0px;
+    transition: .6s;
+}
+
+@keyframes imgBeatRotate {
+    0% {
+        width: 150px;
+    }
+    15% {
+        width: 175px;
+    }
+    35% {
+        width: 150px;
+    }
+    100% {
+        transform: translate(-50%, -50%) rotateZ(360deg);
+    }
+}
+
 #adbWave {
     position: absolute;
     pointer-events: none;
@@ -141,36 +172,6 @@ body {
     height: 175px;
     background-color: var(--couleurBody);
     border-radius: 100%;
-}
-
-#imgWait {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
-    background-color: lightgray;
-    width: 150px;
-    padding: 15px; 
-    border-radius: 50%;
-    filter: opacity(30%);
-    animation: imgBeatRotate 2s ease-in-out infinite;
-    transition: .6s;
-}
-
-@keyframes imgBeatRotate {
-    0% {
-        width: 150px;
-    }
-    15% {
-        width: 175px;
-    }
-    35% {
-        width: 150px;
-    }
-    100% {
-        transform: translate(-50%, -50%) rotateZ(360deg);
-    }
 }
 
 /*!  ___________________________ */
@@ -230,7 +231,7 @@ body {
     height: 0px;
     background-color: lightgray;
     border-radius: 100%;
-    animation: logoAnim .8s cubic-bezier(.6,.34,.67,.36) 1 forwards, wave 2s ease-in-out infinite;
+    animation: logoAnim .8s cubic-bezier(.6,.34,.67,.36) 1 forwards, waveLogo 2s ease-in-out infinite;
     opacity: 0%;
 }
 
@@ -246,7 +247,7 @@ body {
     border-radius: 100%;
 }
 
-@keyframes wave {
+@keyframes waveLogo {
     0% {
         width: 0px;
         height: 0px;
@@ -258,11 +259,6 @@ body {
         opacity: 0%;
     }
 }
-
-/* #wrapper-files {
-    
-    display: none;
-} */
 
 #wrapper-files {
     display: none;
@@ -315,13 +311,13 @@ label:after {
 	content: '';
 	position: absolute;
 	top: 3px;
-	left: 5px;
+	left: 4px;
 	width: 20px;
 	height: 20px;
 	background: #fff;
     box-shadow: rgba(17, 17, 26, 0.1) 0px 2px 0px;
 	border-radius: 90px;
-	transition: 0.3s;
+	transition: 0.2s;
 }
 
 input:checked + label {
@@ -330,10 +326,10 @@ input:checked + label {
 }
 
 input:checked + label:after {
-	left: calc(100% - 5px);
+	left: calc(100% - 3px);
 	transform: translateX(-100%);
 }
 
 label:active:after {
-	width: 25px;
+	width: 26px;
 }
