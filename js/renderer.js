@@ -6,6 +6,7 @@ const wrapperFiles = document.getElementById('wrapper-files');
 var receivedAdbInstalled = false;
 var receivedDeviceId = null;
 var receivedFileList = [];
+var oldReceivedFileList = [];
 
 //!  _________________________
 //! |_______FUNCTIONS________|
@@ -23,6 +24,61 @@ function getVariable(variableName) {
       resolve(arg);
     });
   });
+}
+
+function afficherFichiers(receivedFileList) {
+  var table = document.getElementById('files');
+  for(var i=0; i < receivedFileList.length; i++) {
+    let file = receivedFileList[i];
+    
+    //Calcul de la taille du fichier
+    var taille = file.size;
+    // let bytes = taille;
+    // if (bytes < 1024) {
+    //   taille = bytes + ' bytes';
+    // } else if (bytes < 1048576) {
+    //   taille = (bytes / 1024).toFixed(2) + ' KB';
+    // } else if (bytes < 1073741824) {
+    //   taille = (bytes / 1048576).toFixed(2) + ' MB';
+    // } else {
+    //   taille = (bytes / 1073741824).toFixed(2) + ' GB';
+    // }
+
+    //Ajout de l'icone correspondant au type de fichier
+    let iconPath = '';
+    if(file.type == 'Dossier') {
+      iconPath = 'images/folder.png';
+    } else if (file.type == 'Fichier') {
+      iconPath = 'images/file.png';
+    } else if (file.type == 'Image') {
+      iconPath = 'images/imageIcon.png';
+    } else {
+      iconPath = 'images/unknown.png';
+    }
+
+    //Date
+    let date = file.lastModified.toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    });
+
+    let icon = "<img src='" + iconPath + "' alt='file' width='20' height='20'>"
+    let htmlBlock = "<tr id='"+i+"'><td><input type='checkbox' id='switch"+i+"'/><label for='switch"+i+"'>Toggle</label></td><td>"+icon+"</td><td>"+file.name+"</td><td>"+taille+"</td><td>"+date+"</td></tr>";
+    table.insertAdjacentHTML("beforeend", htmlBlock); 
+  }
+}
+
+function compareFileArrays(array1, array2) {
+  var filesName1 = [];
+  var filesName2 = [];
+  for (var i = 0; i < array1.length; i++) {
+    filesName1.push(array1[i].name);
+  }
+  for (var i = 0; i < array2.length; i++) {
+    filesName2.push(array2[i].name);
+  }
+  return array1.length === array2.length && filesName1.every(function(value, index) { return value === filesName2[index]});
 }
 
 //!  _________________________
@@ -52,9 +108,13 @@ window.addEventListener('DOMContentLoaded', () => {
   }, 2000);
 
   setInterval(() => {
-    window.api.receive('getFileList', (arg) => {
+    window.api.receive('getFileList', (arg) => { 
         receivedFileList = arg;
         console.log(receivedFileList);
+        if(!compareFileArrays(receivedFileList, oldReceivedFileList)) {
+          afficherFichiers(receivedFileList);
+        }
+        oldReceivedFileList = receivedFileList; 
     });
   },2000);
 

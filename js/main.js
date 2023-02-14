@@ -13,8 +13,7 @@ var fileList = [];
 //Variables globales nécessitant une transmission vers renderer.js
 var mainProcessVars = {
   isAdbInstalled: false,
-  deviceId: null,
-  fileList: null
+  deviceId: null
 }
 
 //!  _________________________
@@ -86,55 +85,48 @@ if (!mainProcessVars.isAdbInstalled) {
 var Promise = require('bluebird');
 let idDeviceDetection;
 
+//fonction qui renvoie le type d'un fichier
+function getFileType(file) {
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.tiff', '.cr2', '.arw', '.nef', '.raw'];
+  return((file.isFile() ? ((file.name.endsWith(imageExtensions)) ? 'Image' : 'Fichier') : 'Dossier'));
+}
+
 idDeviceDetection = setInterval(() => {
-  if (mainProcessVars.isAdbInstalled == true) {
-    if (deviceId != null) {
-      mainProcessVars.deviceId = deviceId;
-      fileList = [];
-
-      client.listDevices()
-      .then(function(devices) {
-        //Retour de la promesse d'appareils connectés
-        return Promise.map(devices, function(device) {
-          //Retour de la promesse de lecture du répertoire
-          return client.readdir(device.id, '/sdcard')
-      
-          .then(function(files) {
-            files.forEach(function(file) {
-              var fileType = 'unknown';
-              if (file.isFile()) {
-                if (file.name.endsWith('.jpg') || file.name.endsWith('.jpeg') || file.name.endsWith('.png') || 
-                file.name.endsWith('.gif') || file.name.endsWith('.bmp') || file.name.endsWith('.webp') || 
-                file.name.endsWith('.tiff') || file.name.endsWith('.cr2') || file.name.endsWith('.arw') || 
-                file.name.endsWith('.nef') || file.name.endsWith('.raw')) {
-                  fileType = 'Image';
-                } else {
-                  fileType = 'Fichier';
-                }
-              } else {
-                fileType = 'Dossier';
-              }
-              fileList.push({
-                name: file.name,
-                type: fileType,
-                lastModified: file.mtime,
-                size: file.size,
-                deviceId: device.id
-              });
-            });
-            //Appel à la fonction de callback de la liste des fichiers
-            onFilesReceived(fileList);
-          })
-        })
-      })
-
-      .catch(function(err) {
-        console.error('Il y a eu un problème :', err.stack);
-      });
-    } else {
-      mainProcessVars.deviceId = null;
-    }
+  if(!mainProcessVars.isAdbInstalled || deviceId == null) {
+    mainProcessVars.deviceId = null;
+    return;
   }
+
+  mainProcessVars.deviceId = deviceId;
+  fileList = [];
+
+  client.listDevices()
+  .then(function(devices) {
+    //Retour de la promesse d'appareils connectés
+    return Promise.map(devices, function(device) {
+      //Retour de la promesse de lecture du répertoire
+      return client.readdir(device.id, '/sdcard/Jeux Dolphin')
+  
+      .then(function(files) {
+        files.forEach(function(file) {
+          var fileType = 'unknown';
+          fileList.push({
+            name: file.name,
+            type: getFileType(file),
+            lastModified: file.mtime,
+            size: file.size,
+            deviceId: device.id
+          });
+        });
+        //Appel à la fonction de callback de la liste des fichiers
+        onFilesReceived(fileList);
+      })
+    })
+  })
+
+  .catch(function(err) {
+    console.error('Il y a eu un problème :', err.stack);
+  });
 }, 2000);
 
 function onFilesReceived(fileList) {
@@ -143,9 +135,9 @@ function onFilesReceived(fileList) {
     var nomFichier2 = elementB.name.toUpperCase();
     return (nomFichier1 < nomFichier2 ? (nomFichier1 == nomFichier2 ? 0:-1) : (nomFichier1 == nomFichier2 ? 0:1));
   });
-  mainProcessVars.fileList = fileList;
-  console.log(mainProcessVars.fileList);
-  win.webContents.send('getFileList', mainProcessVars.fileList);
+  console.log(fileList);
+  //Envoi des fichiers au renderer process via le channel getFileList
+  win.webContents.send('getFileList', fileList);
 }
 
 //?  _________________________
