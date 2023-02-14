@@ -8,11 +8,13 @@ const adbDetection = require('./adb-detection.js');
 const usbDetection = require('./usb-detection.js');
 var client = adbkit.createClient({bin: 'C://adb/adb.exe'});
 
+//Liste de tous les fichiers avec leur nom, type, date de modif, taille et deviceId
+var fileList = [];
 //Variables globales nécessitant une transmission vers renderer.js
 var mainProcessVars = {
   isAdbInstalled: false,
   deviceId: null,
-  fileList: []
+  fileList: null
 }
 
 //!  _________________________
@@ -88,7 +90,7 @@ idDeviceDetection = setInterval(() => {
   if (mainProcessVars.isAdbInstalled == true) {
     if (deviceId != null) {
       mainProcessVars.deviceId = deviceId;
-
+      fileList = [];
 
       client.listDevices()
       .then(function(devices) {
@@ -98,8 +100,6 @@ idDeviceDetection = setInterval(() => {
           return client.readdir(device.id, '/sdcard')
       
           .then(function(files) {
-            //Liste de tous les fichiers avec leur nom, type et deviceId
-            var fileList = [];
             files.forEach(function(file) {
               var fileType = 'unknown';
               if (file.isFile()) {
@@ -107,12 +107,12 @@ idDeviceDetection = setInterval(() => {
                 file.name.endsWith('.gif') || file.name.endsWith('.bmp') || file.name.endsWith('.webp') || 
                 file.name.endsWith('.tiff') || file.name.endsWith('.cr2') || file.name.endsWith('.arw') || 
                 file.name.endsWith('.nef') || file.name.endsWith('.raw')) {
-                  fileType = 'image';
+                  fileType = 'Image';
                 } else {
-                  fileType = 'file';
+                  fileType = 'Fichier';
                 }
               } else {
-                fileType = 'folder';
+                fileType = 'Dossier';
               }
               fileList.push({
                 name: file.name,
@@ -122,8 +122,7 @@ idDeviceDetection = setInterval(() => {
                 deviceId: device.id
               });
             });
-
-            // Call the callback function with the file list
+            //Appel à la fonction de callback de la liste des fichiers
             onFilesReceived(fileList);
           })
         })
@@ -145,7 +144,8 @@ function onFilesReceived(fileList) {
     return (nomFichier1 < nomFichier2 ? (nomFichier1 == nomFichier2 ? 0:-1) : (nomFichier1 == nomFichier2 ? 0:1));
   });
   mainProcessVars.fileList = fileList;
-  // console.log(mainProcessVars.fileList);
+  console.log(mainProcessVars.fileList);
+  win.webContents.send('getFileList', mainProcessVars.fileList);
 }
 
 //?  _________________________

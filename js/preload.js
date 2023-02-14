@@ -12,7 +12,7 @@ contextBridge.exposeInMainWorld(
         },
         receive: (channel, func) => {
             //Authorisation des channels ("getAnswer") dans l'array
-            let validChannels = ["getAnswer"];
+            let validChannels = ["getAnswer", "getFileList"];
             if (validChannels.includes(channel)) {
                 ipcRenderer.on(channel, (event, ...args) => func(...args));
             }

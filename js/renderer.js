@@ -5,7 +5,7 @@ const wrapperAdbNotInstalled = document.getElementById('adb-not-installed');
 const wrapperFiles = document.getElementById('wrapper-files');
 var receivedAdbInstalled = false;
 var receivedDeviceId = null;
-
+var receivedFileList = [];
 
 //!  _________________________
 //! |_______FUNCTIONS________|
@@ -49,7 +49,13 @@ window.addEventListener('DOMContentLoaded', () => {
     } else {
       (wrapperFiles.style.display == 'grid' ? changeScreen(wrapperFiles, wrapperIddle, 'block') : "");
     }
-    getVariable('fileList').then(result => {console.log(result);});
   }, 2000);
+
+  setInterval(() => {
+    window.api.receive('getFileList', (arg) => {
+        receivedFileList = arg;
+        console.log(receivedFileList);
+    });
+  },2000);
 
   });
