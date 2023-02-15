@@ -265,26 +265,65 @@ body {
 }
 
 table {
-    margin-top: 200px;
+    margin-top: 180px;
     padding-left: 20px;
     padding-right: 20px;
-    border-spacing: 20px;
+    border-collapse: separate;
+    text-align: left;
+    align-items: center;
+    justify-items: center;
+    border-spacing: 0 30px;
+}
+
+table thead tr {
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+}
+
+th {
+    padding: 8px;
+}
+
+table tbody tr {
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.18) 0px 3px 8px;
+}
+
+table tbody tr:hover {
+    transform: scale(1.005);
+    cursor: pointer;
 }
 
 td {
-    text-align: center;
+    text-align: left;
+    background-color: rgb(228, 228, 228);
 }
 
 td:first-child {
-    border-left: solid 1px transparent;
-    border-top-left-radius: var(--globalRadius);
-    border-bottom-left-radius: var(--globalRadius);
+    background-color: transparent;
+    padding: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+td:nth-child(2) {
+    border-left: solid 2px transparent;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    padding: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 50px;
+    text-align: left;
 }
 
 td:last-child {
-    border-right: solid 1px transparent;
-    border-bottom-right-radius: var(--globalRadius);
-    border-top-right-radius: var(--globalRadius);
+    border-right: solid 2px transparent;
+    border-bottom-right-radius: 10px;
+    border-top-right-radius: 10px;
+    padding: 20px;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }
 
 input[type=checkbox]{
@@ -298,8 +337,8 @@ label {
 	position: relative;
 	cursor: pointer;
 	text-indent: -9999px;
-	width: 45px;
-	height: 18px;
+	width: 40px;
+	height: 13px;
 	background: rgb(178, 176, 176);
     box-shadow: rgba(252, 252, 252, 0.138) 0px 30px 60px -12px inset, rgba(255, 255, 255, 0.193) 0px 18px 36px -18px inset;
 	display: block;
@@ -310,10 +349,10 @@ label {
 label:after {
 	content: '';
 	position: absolute;
-	top: 3px;
-	left: 4px;
-	width: 20px;
-	height: 20px;
+	top: 1.5px;
+	left: 2px;
+	width: 17px;
+	height: 17px;
 	background: #fff;
     box-shadow: rgba(17, 17, 26, 0.1) 0px 2px 0px;
 	border-radius: 90px;
@@ -326,7 +365,7 @@ input:checked + label {
 }
 
 input:checked + label:after {
-	left: calc(100% - 3px);
+	left: calc(100% - 2px);
 	transform: translateX(-100%);
 }
 

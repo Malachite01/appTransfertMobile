@@ -105,11 +105,10 @@ idDeviceDetection = setInterval(() => {
     //Retour de la promesse d'appareils connectés
     return Promise.map(devices, function(device) {
       //Retour de la promesse de lecture du répertoire
-      return client.readdir(device.id, '/sdcard/Jeux Dolphin')
+      return client.readdir(device.id, '/sdcard')
   
       .then(function(files) {
         files.forEach(function(file) {
-          var fileType = 'unknown';
           fileList.push({
             name: file.name,
             type: getFileType(file),
