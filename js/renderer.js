@@ -33,16 +33,16 @@ function afficherFichiers(receivedFileList) {
     
     //Calcul de la taille du fichier
     var taille = file.size;
-    // let bytes = taille;
-    // if (bytes < 1024) {
-    //   taille = bytes + ' bytes';
-    // } else if (bytes < 1048576) {
-    //   taille = (bytes / 1024).toFixed(2) + ' KB';
-    // } else if (bytes < 1073741824) {
-    //   taille = (bytes / 1048576).toFixed(2) + ' MB';
-    // } else {
-    //   taille = (bytes / 1073741824).toFixed(2) + ' GB';
-    // }
+    let bytes = taille;
+    if (bytes < 1000) {
+      taille = bytes + ' o';
+    } else if (bytes < 1000000) {
+      taille = (bytes / 1000).toFixed(2) + ' Ko';
+    } else if (bytes < 1000000000) {
+      taille = (bytes / 1000000).toFixed(2) + ' Mo';
+    } else {
+      taille = (bytes / 1000000000).toFixed(2) + ' Go';
+    }
 
     //Ajout de l'icone correspondant au type de fichier
     let iconPath = '';
@@ -52,6 +52,10 @@ function afficherFichiers(receivedFileList) {
       iconPath = 'images/file.png';
     } else if (file.type == 'Image') {
       iconPath = 'images/imageIcon.png';
+    } else if (file.type == 'Video') {
+      iconPath = 'images/video.png';
+    } else if (file.type == 'Sons') {
+      iconPath = 'images/sons.png';
     } else {
       iconPath = 'images/unknown.png';
     }

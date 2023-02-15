@@ -5,7 +5,6 @@ function trackDevices() {
     return client.listDevices()
       .then((devices) => {
         if (devices.length > 0) {
-          console.log('Appareil detecte:', devices[0].id);
           return devices[0].id;
         }
         return null;

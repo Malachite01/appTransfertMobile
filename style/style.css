@@ -265,7 +265,7 @@ body {
 }
 
 table {
-    margin-top: 180px;
+    margin-top: 150px;
     padding-left: 20px;
     padding-right: 20px;
     border-collapse: separate;
@@ -287,10 +287,12 @@ th {
 table tbody tr {
     border-radius: 10px;
     box-shadow: rgba(0, 0, 0, 0.18) 0px 3px 8px;
+    transition: all .3s;
 }
 
 table tbody tr:hover {
     transform: scale(1.005);
+    box-shadow: rgba(33, 33, 33, 0.067) 0px 0px 0px 3px, rgba(92, 92, 92, 0.067) 0px 0px 0px 6px, rgba(139, 139, 139, 0.078) 0px 0px 0px 9px;
     cursor: pointer;
 }
 
@@ -360,7 +362,7 @@ label:after {
 }
 
 input:checked + label {
-	background: #398bd6;
+	background-color: #398bd6;
     box-shadow: rgba(252, 252, 252, 0.138) 0px 30px 60px -12px inset, rgba(255, 255, 255, 0.193) 0px 18px 36px -18px inset;
 }
 
@@ -371,4 +373,62 @@ input:checked + label:after {
 
 label:active:after {
 	width: 26px;
+}
+
+button > img,
+button > span {
+  vertical-align: middle;
+}
+
+#boutonRetour {
+    position: relative;
+    padding: 2px;
+    border: none;
+    border-radius: 100%;
+    width: 45px;
+    height: 45px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+    top: 170px;
+    left: 20px;
+    transition: all .6s;
+}
+
+#boutonRetour::after {
+    content: "Retour";
+    position: absolute;
+    top: 15px;
+    left: 50px;
+}
+
+#boutonRetour:hover {
+    background-color: rgb(255, 255, 255);
+    box-shadow: #9ca6af2e 0px 0px 0px 3px, #c5c8cb2e 0px 0px 0px 6px, #f5f6f82e 0px 0px 0px 9px;
+    cursor: pointer;
+}
+
+#boutonAllSelect {
+    position: absolute;
+    padding: 5px;
+    padding-left: 8px;
+    border: none;
+    border-radius: 10px;
+    background-color: #398bd6;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+    top: 195px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    vertical-align: center;
+    transition: all .6s;
+}
+
+#boutonAllSelect:hover {
+    background-color: #51a6f7;
+    box-shadow: #5496d42e 0px 0px 0px 3px, #6ba6dd2a 0px 0px 0px 6px, #7ab0e22a 0px 0px 0px 9px;
+    cursor: pointer;
+}
+
+#txtSelection {
+    display: inline;
+    color: white;
+    margin-left: 10px;
 }

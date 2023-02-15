@@ -6,14 +6,16 @@ const adbkit = require('adbkit');
 let win;
 const adbDetection = require('./adb-detection.js');
 const usbDetection = require('./usb-detection.js');
-var client = adbkit.createClient({bin: 'C://adb/adb.exe'});
+var client;
+var directoryIsRead = false;
 
 //Liste de tous les fichiers avec leur nom, type, date de modif, taille et deviceId
 var fileList = [];
 //Variables globales nécessitant une transmission vers renderer.js
 var mainProcessVars = {
   isAdbInstalled: false,
-  deviceId: null
+  deviceId: null,
+  actualPath: ''
 }
 
 //!  _________________________
@@ -84,16 +86,49 @@ if (!mainProcessVars.isAdbInstalled) {
 //? |_____BEGIN_DIR_LIST_____|
 var Promise = require('bluebird');
 let idDeviceDetection;
+mainProcessVars.actualPath = '/sdcard/Download';
 
 //fonction qui renvoie le type d'un fichier
 function getFileType(file) {
   const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.tiff', '.cr2', '.arw', '.nef', '.raw'];
-  return((file.isFile() ? ((file.name.endsWith(imageExtensions)) ? 'Image' : 'Fichier') : 'Dossier'));
+  const videoExtensions = ['.mp4', '.avi', '.mov', '.wmv', '.mkv', '.webm', '.flv', '.3gp', '.m4v','.3g2', '.asf', '.avchd', '.f4v', '.m2ts', '.mpe', '.mpeg', '.mpg', '.mts', '.tod', '.ts', '.vob'];
+  const soundExtensions = ['.mp3', '.wav', '.aiff', '.aac', '.flac', '.alac', '.dsd', '.wma', '.ogg'];
+  if (file.isFile()) {
+    if (imageExtensions.some(extension => file.name.endsWith(extension))) {
+      return 'Image';
+    } else if(videoExtensions.some(extension => file.name.endsWith(extension))) {
+      return 'Video';
+    } else if(soundExtensions.some(extension => file.name.endsWith(extension))) {
+      return 'Sons';
+    } else {
+      return 'Fichier';
+    }
+  } else if(file.isDirectory()) {
+    return 'Dossier';
+  } else {
+    return 'Inconnu';
+  }
+}
+
+async function getFileSize(deviceId, path) {
+  const files = await client.readdir(deviceId, path);
+  let size = 0;
+  for (const file of files) {
+    const filePath = `${path}/${file.name}`;
+    if (file.isDirectory()) {
+      size += await getFileSize(deviceId, filePath);
+    } else {
+      size += file.size;
+    }
+  }
+  return size;
 }
 
 idDeviceDetection = setInterval(() => {
-  if(!mainProcessVars.isAdbInstalled || deviceId == null) {
+  if (!mainProcessVars.isAdbInstalled || deviceId == null) {
     mainProcessVars.deviceId = null;
+    return;
+  } else if (directoryIsRead) {
     return;
   }
 
@@ -101,38 +136,59 @@ idDeviceDetection = setInterval(() => {
   fileList = [];
 
   client.listDevices()
-  .then(function(devices) {
-    //Retour de la promesse d'appareils connectés
-    return Promise.map(devices, function(device) {
-      //Retour de la promesse de lecture du répertoire
-      return client.readdir(device.id, '/sdcard')
-  
-      .then(function(files) {
-        files.forEach(function(file) {
-          fileList.push({
-            name: file.name,
-            type: getFileType(file),
-            lastModified: file.mtime,
-            size: file.size,
-            deviceId: device.id
+    .then(function(devices) {
+      //Retour de la promesse d'appareils connectés
+      return Promise.map(devices, async function(device) {
+        //Retour de la promesse de lecture du répertoire
+        return client.readdir(device.id, mainProcessVars.actualPath)
+          .then(async function(files) {
+            for (const file of files) {
+              // Verifier si le fichier existe déjà dans la liste
+              var index = fileList.findIndex(f => f.name === file.name && f.deviceId === device.id);
+              if (index === -1) {
+                if(!file.isDirectory()) {
+                  fileList.push({
+                    name: file.name,
+                    type: getFileType(file),
+                    lastModified: file.mtime,
+                    size: file.size,
+                    deviceId: device.id
+                  });
+                } else {
+                  const filePath = `${mainProcessVars.actualPath}/${file.name}`;
+                  var size = await getFileSize(device.id, filePath);
+                  fileList.push({
+                    name: file.name,
+                    type: getFileType(file),
+                    lastModified: file.mtime,
+                    size: size,
+                    deviceId: device.id
+                  });
+                }
+              }
+            }
+            //Appel à la fonction de callback de la liste des fichiers
+            onFilesReceived(fileList);
+            directoryIsRead = true;
           });
-        });
-        //Appel à la fonction de callback de la liste des fichiers
-        onFilesReceived(fileList);
-      })
+      });
     })
-  })
-
-  .catch(function(err) {
-    console.error('Il y a eu un problème :', err.stack);
-  });
+    .catch(function(err) {
+      console.error('Il y a eu un problème :', err.stack);
+    });
 }, 2000);
 
 function onFilesReceived(fileList) {
   fileList.sort(function(elementA, elementB) {
-    var nomFichier1 = elementA.name.toUpperCase();
-    var nomFichier2 = elementB.name.toUpperCase();
-    return (nomFichier1 < nomFichier2 ? (nomFichier1 == nomFichier2 ? 0:-1) : (nomFichier1 == nomFichier2 ? 0:1));
+    if (elementA.type === 'Dossier' && elementB.type !== 'Dossier') {
+      return -1;
+    } else if (elementA.type !== 'Dossier' && elementB.type === 'Dossier') {
+      return 1;
+    } else {
+      var nomFichier1 = elementA.name.toUpperCase();
+      var nomFichier2 = elementB.name.toUpperCase();
+      return (nomFichier1 < nomFichier2 ? (nomFichier1 == nomFichier2 ? 0:-1) : (nomFichier1 == nomFichier2 ? 0:1));
+    }
   });
   console.log(fileList);
   //Envoi des fichiers au renderer process via le channel getFileList
