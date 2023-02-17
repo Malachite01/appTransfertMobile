@@ -5,14 +5,14 @@ contextBridge.exposeInMainWorld(
     "api", {
         send: (channel, data) => {
             //Authorisation des channels ("getVariable") dans l'array
-            let validChannels = ["getVariable"];
+            let validChannels = ["getVariable", "changePath"];
             if (validChannels.includes(channel)) {
                 ipcRenderer.send(channel, data);
             }
         },
         receive: (channel, func) => {
             //Authorisation des channels ("getAnswer") dans l'array
-            let validChannels = ["getAnswer", "getFileList"];
+            let validChannels = ["getAnswer", "getFileList", "changePath", "wantsToUpdate"];
             if (validChannels.includes(channel)) {
                 ipcRenderer.on(channel, (event, ...args) => func(...args));
             }

@@ -28,6 +28,7 @@
       
       <button id="boutonRetour"><img src="images/back-arrow.png" alt="retour" width="40"></button>
       <button id="boutonAllSelect"><img src="images/selection.png" alt="sélection" width="20"><span id="txtSelection">Sélection recommandée</span></button>
+      <div id="fileLoader" class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
       <!-- fichiers -->
       <table>
         <thead>
@@ -40,6 +41,8 @@
           </tr>
         </thead>
         <tbody id="files">
+          <p id="actualPath"></p>
+          <p id="nbFichiers"></p>
           <!-- Renderer.js afficher les fichiers -->
         </tbody>
       </table>

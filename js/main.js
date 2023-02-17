@@ -3,6 +3,7 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 const adbkit = require('adbkit');
+const Promise = require('bluebird');
 let win;
 const adbDetection = require('./adb-detection.js');
 const usbDetection = require('./usb-detection.js');
@@ -84,15 +85,30 @@ if (!mainProcessVars.isAdbInstalled) {
 
 //?  _________________________
 //? |_____BEGIN_DIR_LIST_____|
-var Promise = require('bluebird');
 let idDeviceDetection;
-mainProcessVars.actualPath = '/sdcard/Download';
+
+//Chemin du dossier à lire au demarrage
+mainProcessVars.actualPath = '/sdcard';
+ipcMain.on('changePath', (event, arg) => {
+  console.log(arg);
+  if(arg == 'goBack') {
+    if(mainProcessVars.actualPath != '/sdcard') {
+      mainProcessVars.actualPath = mainProcessVars.actualPath.substring(0, mainProcessVars.actualPath.lastIndexOf('/'));
+      directoryIsRead = false;
+      console.log(mainProcessVars.actualPath);
+    }
+  } else {
+    mainProcessVars.actualPath = mainProcessVars.actualPath + "/" + arg;
+    directoryIsRead = false;
+    console.log(mainProcessVars.actualPath);
+  }
+});
 
 //fonction qui renvoie le type d'un fichier
 function getFileType(file) {
   const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.tiff', '.cr2', '.arw', '.nef', '.raw'];
   const videoExtensions = ['.mp4', '.avi', '.mov', '.wmv', '.mkv', '.webm', '.flv', '.3gp', '.m4v','.3g2', '.asf', '.avchd', '.f4v', '.m2ts', '.mpe', '.mpeg', '.mpg', '.mts', '.tod', '.ts', '.vob'];
-  const soundExtensions = ['.mp3', '.wav', '.aiff', '.aac', '.flac', '.alac', '.dsd', '.wma', '.ogg'];
+  const soundExtensions = ['.mp3', '.wav', '.aiff', '.aac', '.flac', '.alac', '.dsd', '.wma', '.ogg', '.m4a'];
   if (file.isFile()) {
     if (imageExtensions.some(extension => file.name.endsWith(extension))) {
       return 'Image';
@@ -124,6 +140,12 @@ async function getFileSize(deviceId, path) {
   return size;
 }
 
+async function fileAlreadyExist(file) {
+  // Verifier si le fichier existe déjà dans la liste
+  var isDuplicate = fileList.some(f => f.name === file.name);
+  return isDuplicate;
+}
+
 idDeviceDetection = setInterval(() => {
   if (!mainProcessVars.isAdbInstalled || deviceId == null) {
     mainProcessVars.deviceId = null;
@@ -143,9 +165,9 @@ idDeviceDetection = setInterval(() => {
         return client.readdir(device.id, mainProcessVars.actualPath)
           .then(async function(files) {
             for (const file of files) {
-              // Verifier si le fichier existe déjà dans la liste
-              var index = fileList.findIndex(f => f.name === file.name && f.deviceId === device.id);
-              if (index === -1) {
+              // Eviter les doublons
+              var isDuplicate = await fileAlreadyExist(file);
+              if (!isDuplicate) {
                 if(!file.isDirectory()) {
                   fileList.push({
                     name: file.name,
@@ -190,9 +212,10 @@ function onFilesReceived(fileList) {
       return (nomFichier1 < nomFichier2 ? (nomFichier1 == nomFichier2 ? 0:-1) : (nomFichier1 == nomFichier2 ? 0:1));
     }
   });
-  console.log(fileList);
+  // console.log(fileList);
   //Envoi des fichiers au renderer process via le channel getFileList
   win.webContents.send('getFileList', fileList);
+  win.webContents.send('wantsToUpdate', true);
 }
 
 //?  _________________________
