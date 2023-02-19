@@ -293,7 +293,6 @@ table tbody tr {
 table tbody tr:hover {
     transform: scale(1.005);
     box-shadow: rgba(33, 33, 33, 0.067) 0px 0px 0px 3px, rgba(92, 92, 92, 0.067) 0px 0px 0px 6px, rgba(139, 139, 139, 0.078) 0px 0px 0px 9px;
-    cursor: pointer;
 }
 
 td {
@@ -339,17 +338,17 @@ input[type=checkbox]{
 }
 
 label {
-    margin-top: -20px;
+  margin-top: -20px;
 	position: relative;
 	cursor: pointer;
 	text-indent: -9999px;
 	width: 40px;
 	height: 13px;
 	background: rgb(178, 176, 176);
-    box-shadow: rgba(252, 252, 252, 0.138) 0px 30px 60px -12px inset, rgba(255, 255, 255, 0.193) 0px 18px 36px -18px inset;
+  box-shadow: rgba(252, 252, 252, 0.138) 0px 30px 60px -12px inset, rgba(255, 255, 255, 0.193) 0px 18px 36px -18px inset;
 	display: block;
 	border-radius: 100px;
-    padding-bottom: 8px;
+  padding-bottom: 8px;
 }
 
 label:after {
@@ -360,7 +359,7 @@ label:after {
 	width: 17px;
 	height: 17px;
 	background: #fff;
-    box-shadow: rgba(17, 17, 26, 0.1) 0px 2px 0px;
+  box-shadow: rgba(17, 17, 26, 0.1) 0px 2px 0px;
 	border-radius: 90px;
 	transition: 0.2s;
 }
@@ -439,6 +438,7 @@ button > span {
 
 .fileName:hover {
   text-decoration: underline;
+  cursor: pointer;
 }
 
 #actualPath {
@@ -540,4 +540,25 @@ button > span {
   100% {
     opacity: 0;
   }
+}
+
+#boutonDownload {
+  display: none;
+  position: fixed;
+  transition: all .6s;
+  bottom: 1%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #398bd6;
+  color: white;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  box-shadow: rgba(41, 40, 40, 0.9) 0px 28px 65px 0px;
+}
+
+#boutonDownload:hover {
+  background-color: #51a6f7;
+  box-shadow: #5496d42e 0px 0px 0px 3px, #6ba6dd2a 0px 0px 0px 6px, #7ab0e22a 0px 0px 0px 9px;
+  cursor: pointer;
 }

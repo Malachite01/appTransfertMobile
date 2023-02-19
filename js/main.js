@@ -83,24 +83,21 @@ if (!mainProcessVars.isAdbInstalled) {
   (idUpdateRendererVar ? clearInterval(idUpdateRendererVar) : "");
 }
 
-//?  _________________________
-//? |_____BEGIN_DIR_LIST_____|
-let idDeviceDetection;
 
+//?  _________________________
+//? |______PATH_CHANGE_______|
 //Chemin du dossier à lire au demarrage
 mainProcessVars.actualPath = '/sdcard';
+
 ipcMain.on('changePath', (event, arg) => {
-  console.log(arg);
   if(arg == 'goBack') {
     if(mainProcessVars.actualPath != '/sdcard') {
       mainProcessVars.actualPath = mainProcessVars.actualPath.substring(0, mainProcessVars.actualPath.lastIndexOf('/'));
       directoryIsRead = false;
-      console.log(mainProcessVars.actualPath);
     }
   } else {
     mainProcessVars.actualPath = mainProcessVars.actualPath + "/" + arg;
     directoryIsRead = false;
-    console.log(mainProcessVars.actualPath);
   }
 });
 
@@ -146,6 +143,11 @@ async function fileAlreadyExist(file) {
   return isDuplicate;
 }
 
+
+//?  _________________________
+//? |_____BEGIN_DIR_LIST_____|
+
+let idDeviceDetection;
 idDeviceDetection = setInterval(() => {
   if (!mainProcessVars.isAdbInstalled || deviceId == null) {
     mainProcessVars.deviceId = null;

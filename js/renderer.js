@@ -7,6 +7,7 @@ var receivedAdbInstalled = false;
 var receivedDeviceId = null;
 var receivedFileList = [];
 var oldReceivedFileList = [];
+var downloadedFilesList = {};
 
 //!  _________________________
 //! |_______FUNCTIONS________|
@@ -43,7 +44,7 @@ async function displayFiles(receivedFileList) {
     if (file.name in fileNames) {
       continue; // Sauter ce fichier et passer a la prochaine iteration
     } else {
-      fileNames[file.name] = true; // add the file name to the array
+      fileNames[file.name] = true; // Ajout du nom du fichier
     }
 
     //Calcul de la taille du fichier
@@ -52,11 +53,11 @@ async function displayFiles(receivedFileList) {
     if (bytes < 1000) {
       taille = bytes + ' o';
     } else if (bytes < 1000000) {
-      taille = (bytes / 1000).toFixed(2) + ' Ko';
+      taille = (bytes / 1024).toFixed(2) + ' Ko';
     } else if (bytes < 1000000000) {
-      taille = (bytes / 1000000).toFixed(2) + ' Mo';
+      taille = (bytes / (1024 * 1024)).toFixed(2) + ' Mo';
     } else {
-      taille = (bytes / 1000000000).toFixed(2) + ' Go';
+      taille = (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' Go';
     }
 
     //Ajout de l'icone correspondant au type de fichier
@@ -83,7 +84,18 @@ async function displayFiles(receivedFileList) {
     });
 
     let icon = "<img src='" + iconPath + "' alt='file' width='20' height='20'>"
-    let htmlBlock = "<tr id='"+i+"'><td><input type='checkbox' id='switch"+i+"'/><label for='switch"+i+"'>Toggle</label></td><td>"+icon+"</td><td class='fileName'>"+file.name+"</td><td>"+taille+"</td><td>"+date+"</td></tr>";
+    var htmlBlock;
+    var selectedPath;
+    var isChecked = "";
+    await getVariable('actualPath').then(path => {
+      selectedPath = path + "/" + file.name; 
+      isChecked = (selectedPath in downloadedFilesList ? 'checked' : '');
+      //Affichage du bouton retour ou du bouton select all
+      (path == "/sdcard") ? changeWhatsDisplayed(document.getElementById('boutonRetour'),document.getElementById('boutonAllSelect'),'block') : changeWhatsDisplayed(document.getElementById('boutonAllSelect'),document.getElementById('boutonRetour'),'block');
+      //Affichage du chemin actuel
+      document.getElementById('actualPath').textContent = path;
+    });
+    htmlBlock = "<tr id='"+i+"'><td><input type='checkbox' id='switch"+i+"' "+isChecked+"><label for='switch"+i+"'>Toggle</label></td><td>"+icon+"</td><td class='fileName'>"+file.name+"</td><td>"+taille+"</td><td>"+date+"</td></tr>";
 
     table.insertAdjacentHTML("beforeend", htmlBlock);
 
@@ -105,8 +117,22 @@ async function displayFiles(receivedFileList) {
     });
     line.addEventListener('change', function(event) {
       var td = event.target.closest('td');
+      var tdNom = td.nextElementSibling.nextElementSibling;
       if (td && td.querySelector('input')) {
-        alert('checkbox');
+        var nom = tdNom.textContent.trim();
+        getVariable('actualPath').then(path => {
+          var selectedPath = path + "/" + nom;
+          if (selectedPath in downloadedFilesList) {
+            delete downloadedFilesList[selectedPath];
+            if (Object.keys(downloadedFilesList).length === 0) {
+              document.getElementById('boutonDownload').style.display = 'none';
+            }
+          } else {
+            downloadedFilesList[selectedPath] = true;
+            document.getElementById('boutonDownload').style.display = 'inline-block';
+          }
+        });
+        console.log(downloadedFilesList);
       }
     });
   }
@@ -138,7 +164,22 @@ window.addEventListener('DOMContentLoaded', () => {
       (idUpdateRendererADB ? clearInterval(idUpdateRendererADB) : " ");
     }
   }, 2000);
-  
+
+  //Update du renderer pour les fichiers
+  setInterval(() => {
+    //Affichage du wrapperFiles
+    getVariable('deviceId').then(result => {
+      receivedDeviceId = result;
+      if (typeof receivedDeviceId === 'string' && receivedDeviceId.length > 0) {
+        (wrapperIddle.style.display == 'block' ? changeWhatsDisplayed(wrapperIddle, wrapperFiles, 'grid') : "");
+      } else {
+        //loader animation
+        changeWhatsDisplayed(document.getElementById('files'), document.getElementById('fileLoader'),'inline-block');
+        (wrapperFiles.style.display == 'grid' ? changeWhatsDisplayed(wrapperFiles, wrapperIddle, 'block') : "");
+      }
+    });
+  }, 1900);
+
   //Ajout du listener pour le bouton de retour
   var goBackButton = document.getElementById("boutonRetour");
   goBackButton.addEventListener('click', async function(event) {
@@ -147,25 +188,6 @@ window.addEventListener('DOMContentLoaded', () => {
       await cleanDisplayedDirectories();
       window.api.send('changePath', 'goBack');
   });
-
-  setInterval(() => {
-    //Boutons retour et allSelect en fonction du path
-    getVariable('actualPath').then(path => {
-      (path == "/sdcard") ? changeWhatsDisplayed(document.getElementById('boutonRetour'),document.getElementById('boutonAllSelect'),'block') : changeWhatsDisplayed(document.getElementById('boutonAllSelect'),document.getElementById('boutonRetour'),'block');
-      document.getElementById('actualPath').textContent = path;
-    });
-  }, 2000);
-
-  //Update du renderer pour les fichiers
-  setInterval(async () => {
-    //Affichage du wrapperFiles
-    getVariable('deviceId').then(result => {receivedDeviceId = result;});
-    if (typeof receivedDeviceId === 'string' && receivedDeviceId.length > 0) {
-      (wrapperIddle.style.display == 'block' ? changeWhatsDisplayed(wrapperIddle, wrapperFiles, 'grid') : "");
-    } else {
-      (wrapperFiles.style.display == 'grid' ? changeWhatsDisplayed(wrapperFiles, wrapperIddle, 'block') : "");
-    }
-  }, 2000);
 
   //?  _________________________
   //? |_____DISPLAY_FILES______|
