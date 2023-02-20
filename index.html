@@ -20,6 +20,9 @@
     </div>
 
     <div id="wrapper-files">
+      <div id="containerCircle">
+        <div id="circle"></div>
+      </div>
       <!-- logo -->
       <div>
         <img src="./images/usb.png" alt="logo usb" class="logo-anim">
@@ -28,6 +31,7 @@
       
       <button id="boutonRetour"><img src="images/back-arrow.png" alt="retour" width="40"></button>
       <button id="boutonAllSelect"><img src="images/selection.png" alt="sélection" width="20"><span id="txtSelection">Sélection recommandée</span></button>
+      <button id="boutonRefresh"><img src="images/reload.png" alt="rafraichir" width="25"></button>
       <div id="fileLoader" class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
       <!-- fichiers -->
       <table>
@@ -46,7 +50,11 @@
           <!-- Renderer.js afficher les fichiers -->
         </tbody>
       </table>
-      <button id="boutonDownload"><img src="images/download.png" alt="téléchargement" width="30">Téléchargement</button>
+      <button id="boutonDownload">
+        <img src="images/download.png" alt="téléchargement" width="30" id="imgDownloadIcon">Téléchargement
+        <input type="file" id="downloadPath"  webkitdirectory directory>
+      </button>
+      <button id="boutonAnnuler"><img src="images/annuler.png" alt="annuler" width="30"></button>
     </div>
   
     <script src="./js/renderer.js"></script>

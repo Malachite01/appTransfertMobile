@@ -47,7 +47,10 @@ async function displayFiles(receivedFileList) {
       fileNames[file.name] = true; // Ajout du nom du fichier
     }
 
-    //Calcul de la taille du fichier
+    //EX: pas la même taille sur android et windows, un dossier de 825Mo android = 786Mo windows
+    //Deux possibilités de calcul, sur android la taille est indiquée par 1000
+    //Sur windows par 1024, j'ai choisi de faire pour windows
+    //Calcul de la taille du fichier 
     var taille = file.size;
     let bytes = taille;
     if (bytes < 1000) {
@@ -97,6 +100,7 @@ async function displayFiles(receivedFileList) {
     });
     htmlBlock = "<tr id='"+i+"'><td><input type='checkbox' id='switch"+i+"' "+isChecked+"><label for='switch"+i+"'>Toggle</label></td><td>"+icon+"</td><td class='fileName'>"+file.name+"</td><td>"+taille+"</td><td>"+date+"</td></tr>";
 
+    //!Ajout de la ligne 
     table.insertAdjacentHTML("beforeend", htmlBlock);
 
     var line = document.getElementById(i);
@@ -126,10 +130,12 @@ async function displayFiles(receivedFileList) {
             delete downloadedFilesList[selectedPath];
             if (Object.keys(downloadedFilesList).length === 0) {
               document.getElementById('boutonDownload').style.display = 'none';
+              document.getElementById('boutonAnnuler').style.display = 'none';
             }
           } else {
             downloadedFilesList[selectedPath] = true;
             document.getElementById('boutonDownload').style.display = 'inline-block';
+            document.getElementById('boutonAnnuler').style.display = 'inline-block';
           }
         });
         console.log(downloadedFilesList);
@@ -180,13 +186,81 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }, 1900);
 
+
+//?  _________________________
+//? |___BUTTONS_LISTENERS____|
+
   //Ajout du listener pour le bouton de retour
   var goBackButton = document.getElementById("boutonRetour");
   goBackButton.addEventListener('click', async function(event) {
-      //loader animation
-      changeWhatsDisplayed(document.getElementById('files'), document.getElementById('fileLoader'),'inline-block');
-      await cleanDisplayedDirectories();
-      window.api.send('changePath', 'goBack');
+    //loader animation
+    changeWhatsDisplayed(document.getElementById('files'), document.getElementById('fileLoader'),'inline-block');
+    await cleanDisplayedDirectories();
+    window.api.send('changePath', 'goBack');
+  });
+
+  //Ajout du listener pour le bouton de sélection recommandée
+  var recommendedButton = document.getElementById("boutonAllSelect");
+  recommendedButton.addEventListener('click', async function(event) {
+    const circle = document.getElementById('circle');
+    const containerCircle = document.getElementById('containerCircle');
+    containerCircle.style.display = 'block';
+    circle.style.backgroundColor = '#bed4dfe1';
+    circle.style.display = 'inline-block';
+    circle.addEventListener('animationend', () => {
+      circle.style.display = 'none';
+      containerCircle.style.display = 'none';
+    });
+    downloadedFilesList = {};
+    //Dossiers recommandés ou il y a habituellement des photos
+    var recommendedFolders = ['/sdcard/Camera', '/sdcard/DCIM', '/sdcard/Download', '/sdcard/Movies', '/sdcard/Pictures', '/sdcard/Snapchat'];
+    for (var i = 0; i < recommendedFolders.length; i++) {
+      var recommendedPath = recommendedFolders[i];
+      downloadedFilesList[recommendedPath] = true;
+    }
+    document.getElementById('boutonDownload').style.display = 'inline-block';
+    document.getElementById('boutonAnnuler').style.display = 'inline-block';
+    await cleanDisplayedDirectories();
+    displayFiles(receivedFileList);
+    console.log(downloadedFilesList);
+  });
+
+  //Ajout du listener pour le bouton rafraichier
+  var refreshButton = document.getElementById("boutonRefresh");
+  refreshButton.addEventListener('click', async function(event) {
+    const circle = document.getElementById('circle');
+    const containerCircle = document.getElementById('containerCircle');
+    containerCircle.style.display = 'block';
+    circle.style.backgroundColor = '#e3dbdbe1';
+    circle.style.display = 'inline-block';
+    circle.addEventListener('animationend', () => {
+      circle.style.display = 'none';
+      containerCircle.style.display = 'none';
+    });
+    downloadedFilesList = {};
+    document.getElementById('boutonDownload').style.display = 'none';
+    document.getElementById('boutonAnnuler').style.display = 'none';
+    await cleanDisplayedDirectories();
+    displayFiles(receivedFileList);
+  });
+
+  //Ajout du listener pour le bouton annuler
+  var cancelButton = document.getElementById("boutonAnnuler");
+  cancelButton.addEventListener('click', async function(event) {
+    const circle = document.getElementById('circle');
+    const containerCircle = document.getElementById('containerCircle');
+    containerCircle.style.display = 'block';
+    circle.style.backgroundColor = '#d49999';
+    circle.style.display = 'inline-block';
+    circle.addEventListener('animationend', () => {
+      circle.style.display = 'none';
+      containerCircle.style.display = 'none';
+    });
+    downloadedFilesList = {};
+    document.getElementById('boutonDownload').style.display = 'none';
+    document.getElementById('boutonAnnuler').style.display = 'none';
+    await cleanDisplayedDirectories();
+    displayFiles(receivedFileList);
   });
 
   //?  _________________________
