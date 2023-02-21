@@ -1,6 +1,6 @@
 //!  _________________________
 //! |_______VARIABLES________|
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog} = require('electron');
 const path = require('path');
 const adbkit = require('adbkit');
 const Promise = require('bluebird');
@@ -219,6 +219,16 @@ function onFilesReceived(fileList) {
   win.webContents.send('getFileList', fileList);
   win.webContents.send('wantsToUpdate', true);
 }
+
+
+//?  _________________________
+//? |__DIRECTORY_SELECTION___|
+ipcMain.on('dirSelection', async (event, arg) => {
+  const result = await dialog.showOpenDialog(win, {
+    properties: ['openDirectory']
+  })
+  console.log('directories selected', result.filePaths)
+})
 
 //?  _________________________
 //? |_____SEND_VARIABLES_____|

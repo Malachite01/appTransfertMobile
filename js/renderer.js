@@ -225,7 +225,7 @@ window.addEventListener('DOMContentLoaded', () => {
     console.log(downloadedFilesList);
   });
 
-  //Ajout du listener pour le bouton rafraichier
+  //Ajout du listener pour le bouton rafraichir
   var refreshButton = document.getElementById("boutonRefresh");
   refreshButton.addEventListener('click', async function(event) {
     const circle = document.getElementById('circle');
@@ -262,6 +262,13 @@ window.addEventListener('DOMContentLoaded', () => {
     await cleanDisplayedDirectories();
     displayFiles(receivedFileList);
   });
+
+   //Ajout du listener pour le bouton telecharger
+  var filePathButton = document.getElementById('boutonDownload');
+  filePathButton.addEventListener('mouseup', async (event) => {
+    window.api.send('dirSelection', '');
+  });
+
 
   //?  _________________________
   //? |_____DISPLAY_FILES______|
