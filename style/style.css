@@ -70,7 +70,7 @@ body {
     }
 }
 
-#iddleWave {
+#idleWave {
     position: absolute;
     pointer-events: none;
     z-index: -1;
@@ -85,7 +85,7 @@ body {
     opacity: 0%;
 }
 
-#iddleWave::before {
+#idleWave::before {
     content: "";
     position: absolute;
     top: 50%;
@@ -125,7 +125,7 @@ body {
     }
 }
 
-#txtUsb {
+.txtUsb {
     position: absolute;
     text-align: center;
     z-index: -1;
@@ -200,6 +200,17 @@ body {
 /*!  ___________________________ */
 /*! |_________FICHIERS_________| */
 
+#logoWave {
+  position: absolute;
+  z-index: 5;
+  background-color: transparent;
+  width: 80px;
+  height: 80px;
+  top: 10px;
+  bottom: 10px;
+  border: none;
+}
+
 .logo-anim {
     position: absolute;
     top: 50%;
@@ -243,7 +254,7 @@ body {
     }
 }
 
-#iddleWaveLogo {
+#idleWaveLogo {
     position: absolute;
     pointer-events: none;
     z-index: -1;
@@ -258,7 +269,7 @@ body {
     opacity: 0%;
 }
 
-#iddleWaveLogo::before {
+#idleWaveLogo::before {
     content: "";
     position: absolute;
     top: 50%;
@@ -665,6 +676,19 @@ button > span {
   border-radius: 5px;
 }
 
+#boutonAnnuler:hover img {
+  animation: rotate .6s ease-in-out forwards;
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(180deg);
+  }
+}
+
 #containerCircle {
   display: none;
   position: absolute;
@@ -704,4 +728,76 @@ button > span {
     transform: translate(-50%, -50%) scale(0);
     opacity: 0;
   }
+}
+
+#wrapper-download {
+  display: none;
+}
+
+#imgWaitDownload {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  background-color: lightgray;
+  width: 150px;
+  padding: 15px; 
+  border-radius: 50%;
+  filter: opacity(30%);
+  animation: imgBeat 2s ease-in-out infinite;
+  box-shadow: rgba(41, 40, 40, 0.878) 0px 48px 100px 0px;
+  transition: .6s;
+}
+
+#waveDownload {
+  position: absolute;
+  pointer-events: none;
+  z-index: -1;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 0px;
+  height: 0px;
+  background-color: rgb(103, 234, 107);
+  border-radius: 100%;
+  animation: wave 2s ease-in-out infinite;
+  opacity: 0%;
+}
+
+#waveDownload::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 175px;
+  height: 175px;
+  background-color: var(--couleurBody);
+  border-radius: 100%;
+}
+
+.progress-bar {
+  position: absolute;
+  display: flex;
+  flex-direction: row;
+  width: 80%;
+  height: 20px;
+  background-color: lightgray;
+  margin: 0 auto;
+  border-radius: 5px;
+  bottom: 80px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  box-shadow: rgba(0, 0, 0, 0.06) 0px 2px 4px 0px inset;
+}
+
+.progress {
+  z-index: 5;
+  background-color: rgb(103, 227, 107);
+  border-radius: 5px;
+  width: 0%;
+  height: 100%;
+  box-shadow: rgba(0, 0, 0, 0.15) 2.4px 2.4px 3.2px;
 }

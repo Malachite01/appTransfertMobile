@@ -1,8 +1,9 @@
 //!  _________________________
 //! |_______VARIABLES________|
-const wrapperIddle = document.getElementById('wrapper-iddle');
+const wrapperIdle = document.getElementById('wrapper-idle');
 const wrapperAdbNotInstalled = document.getElementById('adb-not-installed');
 const wrapperFiles = document.getElementById('wrapper-files');
+const wrapperDownloading = document.getElementById('wrapper-download');
 var receivedAdbInstalled = false;
 var receivedDeviceId = null;
 var receivedFileList = [];
@@ -161,9 +162,9 @@ window.addEventListener('DOMContentLoaded', () => {
     getVariable('isAdbInstalled').then(result => {receivedAdbInstalled = result;});
     //Changement de wrapper
     if (receivedAdbInstalled) {
-      changeWhatsDisplayed(wrapperAdbNotInstalled, wrapperIddle, 'block');
+      changeWhatsDisplayed(wrapperAdbNotInstalled, wrapperIdle, 'block');
     } else {
-      changeWhatsDisplayed(wrapperIddle, wrapperAdbNotInstalled, 'block');
+      changeWhatsDisplayed(wrapperIdle, wrapperAdbNotInstalled, 'block');
     }
     //Stop MAJ si adb est installé pour ne pas surcharger le processeur
     if(receivedAdbInstalled) {
@@ -176,12 +177,12 @@ window.addEventListener('DOMContentLoaded', () => {
     //Affichage du wrapperFiles
     getVariable('deviceId').then(result => {
       receivedDeviceId = result;
-      if (typeof receivedDeviceId === 'string' && receivedDeviceId.length > 0) {
-        (wrapperIddle.style.display == 'block' ? changeWhatsDisplayed(wrapperIddle, wrapperFiles, 'grid') : "");
+      if (typeof receivedDeviceId === 'string' && receivedDeviceId.length > 0 && !isDownloading) {
+          (wrapperIdle.style.display == 'block' ? changeWhatsDisplayed(wrapperIdle, wrapperFiles, 'grid') : "");
       } else {
         //loader animation
         changeWhatsDisplayed(document.getElementById('files'), document.getElementById('fileLoader'),'inline-block');
-        (wrapperFiles.style.display == 'grid' ? changeWhatsDisplayed(wrapperFiles, wrapperIddle, 'block') : "");
+        (wrapperFiles.style.display == 'grid' ? changeWhatsDisplayed(wrapperFiles, wrapperIdle, 'block') : "");
       }
     });
   }, 1900);
@@ -263,13 +264,47 @@ window.addEventListener('DOMContentLoaded', () => {
     displayFiles(receivedFileList);
   });
 
-   //Ajout du listener pour le bouton telecharger
+  //Ajout du listener pour le bouton telecharger
+  var isDownloading = false;
   var filePathButton = document.getElementById('boutonDownload');
   filePathButton.addEventListener('mouseup', async (event) => {
-    window.api.send('dirSelection', '');
+    isDownloading = true;
+    window.api.send('filesToDownload', downloadedFilesList);
+    changeWhatsDisplayed(wrapperFiles, wrapperDownloading, 'block');
+  });
+  //Barre de progression
+  window.api.receive('changeDownloadPercentage', async (arg) => {
+    console.log(arg+'%');
+    document.getElementById('progressPercentage').style.width = arg.toString() +'%';
+  });
+  //fin du téléchargement
+  window.api.receive('finishedDownloading', async (arg) => {
+    alert('Téléchargement terminé !');
+    changeWhatsDisplayed(wrapperDownloading, wrapperFiles, 'grid');
+    isDownloading = false;
+    document.getElementById('progressPercentage').style.width = '0%';
   });
 
+  //?  _________________________
+  //? |_______EASTER_EGG_______|
 
+  function setRandomBackgroundColor() {
+    const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+    document.body.style.backgroundColor = randomColor;
+  }
+  var eaButton = document.getElementById('logoWave');
+  var eaCounter = 0;
+  let idEa;
+  eaButton.addEventListener('click',  (event) => {
+    eaCounter++;
+    if(eaCounter == 10) {
+      idEa = setInterval(setRandomBackgroundColor, 100);
+    } else if(eaCounter > 10){
+      clearInterval(idEa);
+      document.body.style.backgroundColor = "#ffffff";
+      eaCounter = 0;
+    }
+  });
   //?  _________________________
   //? |_____DISPLAY_FILES______|
   //Reception de la liste des fichiers

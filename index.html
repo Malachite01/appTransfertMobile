@@ -7,16 +7,16 @@
     <link rel="stylesheet" href="style/style.css">
   </head>
   <body>
-    <div id="wrapper-iddle">
+    <div id="wrapper-idle">
       <img src="./images/usb.png" alt="logo usb" id="imgUsb">
-      <span id="iddleWave"></span>
-      <p id="txtUsb">En attente de connexion...</p>
+      <span id="idleWave"></span>
+      <p class="txtUsb">En attente de connexion...</p>
     </div>
 
     <div id="adb-not-installed">
       <img src="./images/waiting.png" alt="logo adb not installed" id="imgWait">
       <span id="adbWave"></span>
-      <p id="txtUsb">ADB est en cours d'installation...</p>
+      <p class="txtUsb">ADB est en cours d'installation...</p>
     </div>
 
     <div id="wrapper-files">
@@ -26,8 +26,9 @@
       <!-- logo -->
       <div>
         <img src="./images/usb.png" alt="logo usb" class="logo-anim">
-        <span id="iddleWaveLogo"></span>
+        <span id="idleWaveLogo"></span>
       </div>
+      <button id="logoWave"></button>
       
       <button id="boutonRetour"><img src="images/back-arrow.png" alt="retour" width="40"></button>
       <button id="boutonAllSelect"><img src="images/selection.png" alt="sélection" width="20"><span id="txtSelection">Sélection recommandée</span></button>
@@ -54,6 +55,15 @@
         <img src="images/download.png" alt="téléchargement" width="30" id="imgDownloadIcon">Téléchargement
       </button>
       <button id="boutonAnnuler"><img src="images/annuler.png" alt="annuler" width="30"></button>
+    </div>
+
+    <div id="wrapper-download">
+      <img src="./images/carton.gif" alt="logo en cours de téléchargement" id="imgWaitDownload">
+      <span id="waveDownload"></span>
+      <div class="progress-bar">
+        <div class="progress" id="progressPercentage"></div>
+      </div>
+      <p class="txtUsb">Vos fichiers sont en cours d'importation ! </p>
     </div>
   
     <script src="./js/renderer.js"></script>

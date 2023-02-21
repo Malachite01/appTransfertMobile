@@ -3,6 +3,7 @@
 const { app, BrowserWindow, ipcMain, dialog} = require('electron');
 const path = require('path');
 const adbkit = require('adbkit');
+const fs = require('fs');
 const Promise = require('bluebird');
 let win;
 const adbDetection = require('./adb-detection.js');
@@ -12,11 +13,13 @@ var directoryIsRead = false;
 
 //Liste de tous les fichiers avec leur nom, type, date de modif, taille et deviceId
 var fileList = [];
+//liste des fichiers à télécharger
+var filesToDownload = [];
 //Variables globales nécessitant une transmission vers renderer.js
 var mainProcessVars = {
   isAdbInstalled: false,
   deviceId: null,
-  actualPath: ''
+  actualPath: '/sdcard'
 }
 
 //!  _________________________
@@ -66,7 +69,6 @@ adbDetection.checkAdb()
       }
     }
   );
-
 //Update isAdbInstalled pour changer le wrapper affiché par renderer.js
 function updateRendererVar() {
   adbDetection.checkAdb()
@@ -74,7 +76,6 @@ function updateRendererVar() {
       mainProcessVars.isAdbInstalled = isAdbInstalled;
     });
 }
-
 let idUpdateRendererVar;
 //si !isAdbInstalled, alors update toutes les secondes, sinon on arrête la mise à jour
 if (!mainProcessVars.isAdbInstalled) {
@@ -86,8 +87,6 @@ if (!mainProcessVars.isAdbInstalled) {
 
 //?  _________________________
 //? |______PATH_CHANGE_______|
-//Chemin du dossier à lire au demarrage
-mainProcessVars.actualPath = '/sdcard';
 
 ipcMain.on('changePath', (event, arg) => {
   if(arg == 'goBack') {
@@ -101,25 +100,38 @@ ipcMain.on('changePath', (event, arg) => {
   }
 });
 
+
 //fonction qui renvoie le type d'un fichier
-function getFileType(file) {
+function getFileType(file, type) {
   const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.tiff', '.cr2', '.arw', '.nef', '.raw'];
   const videoExtensions = ['.mp4', '.avi', '.mov', '.wmv', '.mkv', '.webm', '.flv', '.3gp', '.m4v','.3g2', '.asf', '.avchd', '.f4v', '.m2ts', '.mpe', '.mpeg', '.mpg', '.mts', '.tod', '.ts', '.vob'];
   const soundExtensions = ['.mp3', '.wav', '.aiff', '.aac', '.flac', '.alac', '.dsd', '.wma', '.ogg', '.m4a'];
-  if (file.isFile()) {
-    if (imageExtensions.some(extension => file.name.endsWith(extension))) {
-      return 'Image';
-    } else if(videoExtensions.some(extension => file.name.endsWith(extension))) {
-      return 'Video';
-    } else if(soundExtensions.some(extension => file.name.endsWith(extension))) {
+  if(type == "Affichage") {
+    if (file.isFile()) {
+      if (imageExtensions.some(extension => file.name.endsWith(extension))) {
+        return 'Image';
+      } else if(videoExtensions.some(extension => file.name.endsWith(extension))) {
+        return 'Video';
+      } else if(soundExtensions.some(extension => file.name.endsWith(extension))) {
+        return 'Sons';
+      } else {
+        return 'Fichier';
+      }
+    } else if(file.isDirectory()) {
+      return 'Dossier';
+    } else {
+      return 'Inconnu';
+    }
+  } else if(type == "Téléchargement") {
+    if(imageExtensions.some(extension => path.extname(file) === extension)) {
+      return 'Images';
+    } else if(videoExtensions.some(extension => path.extname(file) === extension)) {
+      return 'Videos';
+    } else if(soundExtensions.some(extension => path.extname(file) === extension)) {
       return 'Sons';
     } else {
-      return 'Fichier';
+      return 'Fichiers';
     }
-  } else if(file.isDirectory()) {
-    return 'Dossier';
-  } else {
-    return 'Inconnu';
   }
 }
 
@@ -173,7 +185,7 @@ idDeviceDetection = setInterval(() => {
                 if(!file.isDirectory()) {
                   fileList.push({
                     name: file.name,
-                    type: getFileType(file),
+                    type: getFileType(file, 'Affichage'),
                     lastModified: file.mtime,
                     size: file.size,
                     deviceId: device.id
@@ -183,7 +195,7 @@ idDeviceDetection = setInterval(() => {
                   var size = await getFileSize(device.id, filePath);
                   fileList.push({
                     name: file.name,
-                    type: getFileType(file),
+                    type: getFileType(file, 'Affichage'),
                     lastModified: file.mtime,
                     size: size,
                     deviceId: device.id
@@ -222,13 +234,93 @@ function onFilesReceived(fileList) {
 
 
 //?  _________________________
-//? |__DIRECTORY_SELECTION___|
-ipcMain.on('dirSelection', async (event, arg) => {
-  const result = await dialog.showOpenDialog(win, {
-    properties: ['openDirectory']
-  })
-  console.log('directories selected', result.filePaths)
-})
+//? |_DIR_SELECTION/DOWNLOAD_|
+
+// Fonction pour télécharger un fichier
+async function downloadFile(src, dest) {
+  try {
+    const stat = await client.stat(mainProcessVars.deviceId, src);
+    if (!stat.isFile()) {
+      console.error(`Erreur: ${src} n'est pas un fichier`);
+      return;
+    }
+    // Créer le dossier de destination si il n'existe pas
+    const fileType = getFileType(src, 'Téléchargement');
+    const destFolder = `${dest}/${fileType}/`;
+    if (!fs.existsSync(destFolder)) {
+      fs.mkdirSync(destFolder, { recursive: true });
+    }
+    const destPath = path.join(destFolder, path.basename(src));
+    const adbStream = await client.pull(mainProcessVars.deviceId, src);
+    const fileStream = fs.createWriteStream(destPath);
+
+    adbStream.pipe(fileStream);
+    await new Promise((resolve, reject) => {
+      adbStream.on('end', resolve);
+      adbStream.on('error', reject);
+    });
+  } catch (err) {
+    console.error(`Erreur pour le fichier ${src}: ${err.message}`);
+  }
+}
+
+// Function pour télécharger un dossier récursivement
+async function downloadFolder(src, dest) {
+  try {
+    const files = await client.readdir(mainProcessVars.deviceId, src);
+    for (let file of files) {
+      const srcPath = `${src}/${file.name}`;
+      const destPath = `${dest}`;
+      //Si le fichier est un dossier, on rappelle la fonction
+      if (file.isDirectory()) {
+        await downloadFolder(srcPath, destPath);
+      } else {
+        await downloadFile(srcPath, dest);
+      }
+    }
+  } catch (err) {
+    console.error(`Error downloading folder ${src}: ${err.message}`);
+  }
+}
+
+// Fonction pour lancer le téléchargement
+async function download(src, dest) {
+  try {
+    const stat = await client.stat(mainProcessVars.deviceId, src);
+    if (stat.isDirectory()) {
+      await downloadFolder(src, dest);
+    } else {
+      await downloadFile(src, dest);
+    }
+  } catch (err) {
+    console.error(`Error downloading ${src}: ${err.message}`);
+  }
+}
+
+//Réception de la liste des fichiers à télécharger
+ipcMain.on('filesToDownload', async (event, arg) => {
+  filesToDownload = Object.keys(arg);
+  //Choix du répertoire de destination
+  let destPath = '';
+  while (destPath == '') {
+    const result = await dialog.showOpenDialog(win, {
+      properties: ['openDirectory']
+    });
+    if (!result.canceled && result.filePaths.length > 0) {
+      destPath = result.filePaths[0];
+    }
+  }
+  try {
+    for (let src of filesToDownload) {
+      await download(src, destPath);
+    }
+    console.log('Download completed!');
+    win.webContents.send('finishedDownloading', true);
+    win.webContents.send('getFileList', fileList);
+  } catch (err) {
+    console.error(err);
+  }
+}); 
 
 //?  _________________________
 //? |_____SEND_VARIABLES_____|
