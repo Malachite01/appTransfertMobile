@@ -801,3 +801,22 @@ button > span {
   height: 100%;
   box-shadow: rgba(0, 0, 0, 0.15) 2.4px 2.4px 3.2px;
 }
+
+#fileName {
+  font-size: .9em;
+  position: absolute;
+  bottom: 105px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: grey
+}
+
+#fileNb {
+  display: inline-block;
+  position: absolute;
+  top: 105px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 3em;
+  color: gray;
+}

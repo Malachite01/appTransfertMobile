@@ -229,6 +229,7 @@ window.addEventListener('DOMContentLoaded', () => {
   //Ajout du listener pour le bouton rafraichir
   var refreshButton = document.getElementById("boutonRefresh");
   refreshButton.addEventListener('click', async function(event) {
+    window.api.send('refresh', true);
     const circle = document.getElementById('circle');
     const containerCircle = document.getElementById('containerCircle');
     containerCircle.style.display = 'block';
@@ -274,8 +275,15 @@ window.addEventListener('DOMContentLoaded', () => {
   });
   //Barre de progression
   window.api.receive('changeDownloadPercentage', async (arg) => {
-    console.log(arg+'%');
-    document.getElementById('progressPercentage').style.width = arg.toString() +'%';
+    console.log(arg[0]+'%');
+    document.getElementById('progressPercentage').style.width = arg[0].toString() +'%';
+    document.getElementById('fileName').innerText = arg[1].toString();
+    const fileNb = document.querySelector('#fileNb');
+    fileNb.querySelector('span:first-child').innerText = arg[2]+1;
+  });
+  //nb de fichiers
+  window.api.receive('nbOfFiles', async (arg) => {
+    fileNb.querySelector('span:last-child').innerText = arg;
   });
   //fin du téléchargement
   window.api.receive('finishedDownloading', async (arg) => {

@@ -232,9 +232,35 @@ function onFilesReceived(fileList) {
   win.webContents.send('getFileList', fileList);
 }
 
+//Refresh de la liste des fichiers
+ipcMain.on('refresh', async (event, arg) => {
+  directoryIsRead = false;
+}); 
 
 //?  _________________________
 //? |_DIR_SELECTION/DOWNLOAD_|
+let downloadedCount = 0;
+
+// Fonction qui permet de compter le nombre de fichiers a télécharger
+async function countFiles(files) {
+  let count = 0;
+  for (let file of files) {
+    try {
+      const stat = await client.stat(mainProcessVars.deviceId, file);
+      if (stat.isDirectory()) {
+        const subfiles = await client.readdir(mainProcessVars.deviceId, file);
+        const subfilePaths = subfiles.map((subfile) => `${file}/${subfile.name}`);
+        const subCount = await countFiles(subfilePaths);
+        count += subCount;
+      } else {
+        count++;
+      }
+    } catch (err) {
+      console.error(`Error counting files for ${file}: ${err.message}`);
+    }
+  }
+  return count;
+}
 
 // Fonction de téléchargement d'un fichier
 async function downloadFile(src, dest, totalSize, totalTransferred) {
@@ -246,6 +272,7 @@ async function downloadFile(src, dest, totalSize, totalTransferred) {
     }
     // Créer le dossier de destination si il n'existe pas
     const fileType = getFileType(src, 'Téléchargement');
+    const fileName = path.basename(src);
     const destFolder = `${dest}/${fileType}/`;
     if (!fs.existsSync(destFolder)) {
       fs.mkdirSync(destFolder, { recursive: true });
@@ -254,19 +281,22 @@ async function downloadFile(src, dest, totalSize, totalTransferred) {
     //Création du stream de téléchargement
     const adbStream = await client.pull(mainProcessVars.deviceId, src);
     const fileStream = fs.createWriteStream(destPath);
-
     //Calcul du pourcentage de téléchargement du fichier en cours
     let transferred = 0;
     adbStream.on('data', (chunk) => {
       transferred += chunk.length;
       totalTransferred += chunk.length;
       const percentage = ((totalTransferred / totalSize) * 100).toFixed();
-      win.webContents.send('changeDownloadPercentage', percentage);
+      console.log(percentage+'%');
+      win.webContents.send('changeDownloadPercentage', [percentage,fileName,downloadedCount]);
     });
     //Téléchargement du fichier et transfert dans le dossier de destination
     adbStream.pipe(fileStream);
     await new Promise((resolve, reject) => {
-      adbStream.on('end', resolve);
+      adbStream.on('end', () => {
+        downloadedCount++;
+        resolve();
+      });
       adbStream.on('error', reject);
     });
   } catch (err) {
@@ -274,6 +304,7 @@ async function downloadFile(src, dest, totalSize, totalTransferred) {
   }
 }
 
+//Fonction de téléchargement d'un dossier
 async function downloadFolder(src, dest, totalSize, totalTransferred) {
   try {
     const files = await client.readdir(mainProcessVars.deviceId, src);
@@ -294,6 +325,7 @@ async function downloadFolder(src, dest, totalSize, totalTransferred) {
   }
 }
 
+//Fonction de téléchargement
 async function download(src, dest) {
   try {
     const stat = await client.stat(mainProcessVars.deviceId, src);
@@ -309,9 +341,13 @@ async function download(src, dest) {
   }
 }
 
+//Lancement du téléchargement
 ipcMain.on('filesToDownload', async (event, arg) => {
   let destPath = '';
   filesToDownload = Object.keys(arg);
+  var totalFileNb = await countFiles(filesToDownload);
+  //Envoie du nb de fichiers a télécharger
+  win.webContents.send('nbOfFiles', totalFileNb);
   //Choix du répertoire de destination
   while (destPath == '') {
     const result = await dialog.showOpenDialog(win, {
@@ -328,6 +364,7 @@ ipcMain.on('filesToDownload', async (event, arg) => {
     console.log('Download completed!');
     win.webContents.send('finishedDownloading', true);
     win.webContents.send('getFileList', fileList);
+    downloadedCount = 0;
   } catch (err) {
     console.error(err);
   }
