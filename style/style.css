@@ -503,6 +503,10 @@ button > span {
   cursor: pointer;
 }
 
+.empty {
+  cursor: not-allowed;
+}
+
 #actualPath {
   position: absolute;
   color: grey;

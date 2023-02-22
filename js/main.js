@@ -212,6 +212,7 @@ idDeviceDetection = setInterval(() => {
     .catch(function(err) {
       console.error('Il y a eu un problème :', err.stack);
     });
+    console.log(mainProcessVars.deviceId);
 }, 2000);
 
 function onFilesReceived(fileList) {
@@ -228,8 +229,8 @@ function onFilesReceived(fileList) {
   });
   // console.log(fileList);
   //Envoi des fichiers au renderer process via le channel getFileList
-  win.webContents.send('wantsToUpdate', true);
   win.webContents.send('getFileList', fileList);
+  win.webContents.send('wantsToUpdate', true);
 }
 
 //Refresh de la liste des fichiers
@@ -256,7 +257,9 @@ async function countFiles(files) {
         count++;
       }
     } catch (err) {
-      console.error(`Error counting files for ${file}: ${err.message}`);
+      if (err.code !== 'ENOENT') {
+        console.error(`Error counting files for ${file}: ${err.message}`);
+      }
     }
   }
   return count;

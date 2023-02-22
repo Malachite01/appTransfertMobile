@@ -91,6 +91,7 @@ async function displayFiles(receivedFileList) {
     var htmlBlock;
     var selectedPath;
     var isChecked = "";
+    var fileName;
     await getVariable('actualPath').then(path => {
       selectedPath = path + "/" + file.name; 
       isChecked = (selectedPath in downloadedFilesList ? 'checked' : '');
@@ -99,13 +100,14 @@ async function displayFiles(receivedFileList) {
       //Affichage du chemin actuel
       document.getElementById('actualPath').textContent = path;
     });
-    htmlBlock = "<tr id='"+i+"'><td><input type='checkbox' id='switch"+i+"' "+isChecked+"><label for='switch"+i+"'>Toggle</label></td><td>"+icon+"</td><td class='fileName'>"+file.name+"</td><td>"+taille+"</td><td>"+date+"</td></tr>";
+    (taille == "0 o" ? fileName = "empty" : fileName = "fileName");
+    htmlBlock = "<tr id='"+i+"'><td><input type='checkbox' id='switch"+i+"' "+isChecked+"><label for='switch"+i+"'>Toggle</label></td><td>"+icon+"</td><td class='"+fileName+"'>"+file.name+"</td><td>"+taille+"</td><td>"+date+"</td></tr>";
 
     //!Ajout de la ligne 
     table.insertAdjacentHTML("beforeend", htmlBlock);
 
     var line = document.getElementById(i);
-    line.addEventListener('click', async function(event) {
+    line.addEventListener('mouseup', async function(event) {
       var td = event.target.closest('td');
       if (td && td.classList.contains('fileName')) {
         var nom = td.textContent.trim();
@@ -318,7 +320,18 @@ window.addEventListener('DOMContentLoaded', () => {
   //Reception de la liste des fichiers
   window.api.receive('getFileList', async (arg) => { 
     receivedFileList = arg;
-    // console.log(receivedFileList);
+    receivedFileList.sort(function(elementA, elementB) {
+      if (elementA.type === 'Dossier' && elementB.type !== 'Dossier') {
+        return -1;
+      } else if (elementA.type !== 'Dossier' && elementB.type === 'Dossier') {
+        return 1;
+      } else {
+        var nomFichier1 = elementA.name.toUpperCase();
+        var nomFichier2 = elementB.name.toUpperCase();
+        return (nomFichier1 < nomFichier2 ? (nomFichier1 == nomFichier2 ? 0:-1) : (nomFichier1 == nomFichier2 ? 0:1));
+      }
+    });
+    console.log(receivedFileList);
     changeWhatsDisplayed(document.getElementById('fileLoader'), document.getElementById('files'),'');
   });
   //Reception de la variable wantsToUpdate
