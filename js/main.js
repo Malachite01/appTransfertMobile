@@ -207,8 +207,9 @@ idDeviceDetection = setInterval(() => {
             }
             directoryIsRead = true;
             await sortFileList(fileList).then(() => {
-              //Envoi des fichiers au renderer process via le channel getFileList
+              //Suppression des doublons
               const uniqueFileList = [...new Map(fileList.map((file) => [file.name, file])).values()];
+              //Envoi des fichiers au renderer process via le channel getFileList
               win.webContents.send('getFileList', uniqueFileList);
               win.webContents.send('wantsToUpdate', true);
             });
