@@ -155,8 +155,7 @@ async function getFileSize(deviceId, path) {
 
 async function fileAlreadyExist(file) {
   // Verifier si le fichier existe déjà dans la liste
-  var isDuplicate = fileList.some(f => f.name === file.name);
-  return isDuplicate;
+  return fileList.some(f => f.name === file.name);
 }
 
 
@@ -184,8 +183,7 @@ idDeviceDetection = setInterval(() => {
           .then(async function(files) {
             for (const file of files) {
               // Eviter les doublons
-              var isDuplicate = await fileAlreadyExist(file);
-              if (!isDuplicate) {
+              if (!await fileAlreadyExist(file)) {
                 if(!file.isDirectory()) {
                   fileList.push({
                     name: file.name,
@@ -207,19 +205,22 @@ idDeviceDetection = setInterval(() => {
                 }
               }
             }
-            //Appel à la fonction de callback de la liste des fichiers
-            onFilesReceived(fileList);
             directoryIsRead = true;
+            await sortFileList(fileList).then(() => {
+              //Envoi des fichiers au renderer process via le channel getFileList
+              const uniqueFileList = [...new Map(fileList.map((file) => [file.name, file])).values()];
+              win.webContents.send('getFileList', uniqueFileList);
+              win.webContents.send('wantsToUpdate', true);
+            });
           });
       });
     })
     .catch(function(err) {
       console.error('Il y a eu un problème :', err.stack);
     });
-    console.log(mainProcessVars.deviceId);
 }, 2000);
 
-function onFilesReceived(fileList) {
+async function sortFileList(fileList) {
   fileList.sort(function(elementA, elementB) {
     if (elementA.type === 'Dossier' && elementB.type !== 'Dossier') {
       return -1;
@@ -231,9 +232,6 @@ function onFilesReceived(fileList) {
       return (nomFichier1 < nomFichier2 ? (nomFichier1 == nomFichier2 ? 0:-1) : (nomFichier1 == nomFichier2 ? 0:1));
     }
   });
-  //Envoi des fichiers au renderer process via le channel getFileList
-  win.webContents.send('getFileList', fileList);
-  win.webContents.send('wantsToUpdate', true);
 }
 
 //Refresh de la liste des fichiers

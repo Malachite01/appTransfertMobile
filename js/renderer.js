@@ -6,6 +6,8 @@ const wrapperFiles = document.getElementById('wrapper-files');
 const wrapperDownloading = document.getElementById('wrapper-download');
 var receivedAdbInstalled = false;
 var receivedDeviceId = null;
+//Dossiers recommandés ou il y a habituellement des medias
+const recommendedFolders = ['/sdcard/Camera', '/sdcard/DCIM', '/sdcard/Download', '/sdcard/Movies', '/sdcard/Pictures', '/sdcard/Snapchat', '/sdcard/WhatsApp', '/sdcard/Bluetooth', '/sdcard/Telegram', '/sdcard/Videos'];
 var receivedFileList = [];
 var downloadedFilesList = {};
 
@@ -185,7 +187,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   //Ajout du listener pour le bouton de retour
   var goBackButton = document.getElementById("boutonRetour");
-  goBackButton.addEventListener('click', async function(event) {
+  goBackButton.addEventListener('mouseup', async function(event) {
     //loader animation
     changeWhatsDisplayed(document.getElementById('files'), document.getElementById('fileLoader'),'inline-block');
     await cleanDisplayedDirectories();
@@ -194,7 +196,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   //Ajout du listener pour le bouton de sélection recommandée
   var recommendedButton = document.getElementById("boutonAllSelect");
-  recommendedButton.addEventListener('click', async function(event) {
+  recommendedButton.addEventListener('mouseup', async function(event) {
     const circle = document.getElementById('circle');
     const containerCircle = document.getElementById('containerCircle');
     containerCircle.style.display = 'block';
@@ -205,8 +207,6 @@ window.addEventListener('DOMContentLoaded', () => {
       containerCircle.style.display = 'none';
     });
     downloadedFilesList = {};
-    //Dossiers recommandés ou il y a habituellement des photos
-    var recommendedFolders = ['/sdcard/Camera', '/sdcard/DCIM', '/sdcard/Download', '/sdcard/Movies', '/sdcard/Pictures', '/sdcard/Snapchat'];
     //Liste des noms des fichiers reçus pour la vérification
     var receivedFileNames = [];
     for (let i = 0; i < receivedFileList.length; i++) {
@@ -230,7 +230,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   //Ajout du listener pour le bouton rafraichir
   var refreshButton = document.getElementById("boutonRefresh");
-  refreshButton.addEventListener('click', async function(event) {
+  refreshButton.addEventListener('mouseup', async function(event) {
     window.api.send('refresh', true);
     const circle = document.getElementById('circle');
     const containerCircle = document.getElementById('containerCircle');
@@ -250,7 +250,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   //Ajout du listener pour le bouton annuler
   var cancelButton = document.getElementById("boutonAnnuler");
-  cancelButton.addEventListener('click', async function(event) {
+  cancelButton.addEventListener('mouseup', async function(event) {
     const circle = document.getElementById('circle');
     const containerCircle = document.getElementById('containerCircle');
     containerCircle.style.display = 'block';
