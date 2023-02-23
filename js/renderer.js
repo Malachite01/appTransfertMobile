@@ -7,7 +7,6 @@ const wrapperDownloading = document.getElementById('wrapper-download');
 var receivedAdbInstalled = false;
 var receivedDeviceId = null;
 var receivedFileList = [];
-var oldReceivedFileList = [];
 var downloadedFilesList = {};
 
 //!  _________________________
@@ -141,19 +140,10 @@ async function displayFiles(receivedFileList) {
             document.getElementById('boutonAnnuler').style.display = 'inline-block';
           }
         });
-        console.log(downloadedFilesList);
       }
     });
   }
-  var fileNamesArray = Object.keys(fileNames);
-  var fileNamesLength = fileNamesArray.length;
-  document.getElementById('nbFichiers').textContent = fileNamesLength + " fichier(s)";
-}
-
-function compareFileArrays(array1, array2) {
-  var filesName1 = array1.map(function(file) { return file.name; }).sort();
-  var filesName2 = array2.map(function(file) { return file.name; }).sort();
-  return filesName1.length === filesName2.length && filesName1.every(function(value, index) { return value === filesName2[index]});
+  document.getElementById('nbFichiers').textContent = Object.keys(fileNames).length + " fichier(s)";
 }
 
 //!  _________________________
@@ -217,15 +207,25 @@ window.addEventListener('DOMContentLoaded', () => {
     downloadedFilesList = {};
     //Dossiers recommandés ou il y a habituellement des photos
     var recommendedFolders = ['/sdcard/Camera', '/sdcard/DCIM', '/sdcard/Download', '/sdcard/Movies', '/sdcard/Pictures', '/sdcard/Snapchat'];
+    //Liste des noms des fichiers reçus pour la vérification
+    var receivedFileNames = [];
+    for (let i = 0; i < receivedFileList.length; i++) {
+      receivedFileNames.push(receivedFileList[i].name);
+    }
+    //Ajout dans le dossier de download
     for (var i = 0; i < recommendedFolders.length; i++) {
       var recommendedPath = recommendedFolders[i];
-      downloadedFilesList[recommendedPath] = true;
+      var verif = recommendedFolders[i].replace('/sdcard/', '');
+      //Vérification si le dossier existe via le nom des fichiers reçus
+      if (receivedFileNames.includes(verif)) {
+        downloadedFilesList[recommendedPath] = true;
+      }
     }
     document.getElementById('boutonDownload').style.display = 'inline-block';
     document.getElementById('boutonAnnuler').style.display = 'inline-block';
     await cleanDisplayedDirectories();
     displayFiles(receivedFileList);
-    console.log(downloadedFilesList);
+    console.log("Fichiers à télécharger :", downloadedFilesList);
   });
 
   //Ajout du listener pour le bouton rafraichir

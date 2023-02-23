@@ -1,11 +1,13 @@
 {
-  "name": "application-transfert",
+  "name": "applicationtransfert",
   "version": "1.0.0",
-  "description": "",
+  "description": "An application made to easily transfer files from a mobile phone to a computer.",
   "main": "./js/main.js",
   "scripts": {
     "start": "electron .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
   },
   "repository": {
     "type": "git",
@@ -19,12 +21,18 @@
   },
   "homepage": "https://github.com/Malachite01/appTransfertMobile#readme",
   "devDependencies": {
+    "@electron-forge/cli": "^6.0.5",
+    "@electron-forge/maker-deb": "^6.0.5",
+    "@electron-forge/maker-rpm": "^6.0.5",
+    "@electron-forge/maker-squirrel": "^6.0.5",
+    "@electron-forge/maker-zip": "^6.0.5",
     "electron": "^22.0.2"
   },
   "dependencies": {
     "adbkit": "^2.11.1",
     "bluebird": "^3.7.2",
     "child_process": "^1.0.2",
+    "electron-squirrel-startup": "^1.0.0",
     "fs": "^0.0.1-security",
     "remote": "^0.2.6",
     "usb": "^2.6.0"

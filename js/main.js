@@ -24,6 +24,9 @@ var mainProcessVars = {
 
 //!  _________________________
 //! |_____INITIALISATION_____|
+
+if (require('electron-squirrel-startup')) app.quit();
+
 function createWindow () {
   win = new BrowserWindow({
     width: 1200,
@@ -35,7 +38,8 @@ function createWindow () {
       preload: path.join(__dirname, './preload.js')
     }
   })
-  win.loadFile(path.join(__dirname, '../index.html'))
+  win.loadFile(path.join(__dirname, '../index.html'));
+  // win.removeMenu();
 }
 // Lorsque l'application est prête, créer une fenêtre
 app.whenReady().then(() => {
@@ -227,7 +231,6 @@ function onFilesReceived(fileList) {
       return (nomFichier1 < nomFichier2 ? (nomFichier1 == nomFichier2 ? 0:-1) : (nomFichier1 == nomFichier2 ? 0:1));
     }
   });
-  // console.log(fileList);
   //Envoi des fichiers au renderer process via le channel getFileList
   win.webContents.send('getFileList', fileList);
   win.webContents.send('wantsToUpdate', true);
