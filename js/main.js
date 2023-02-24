@@ -50,6 +50,7 @@ app.whenReady().then(() => {
       createWindow();
     }
   })
+  app.commandLine.appendSwitch('force_high_performance_gpu');
 })
 
 
@@ -287,9 +288,7 @@ async function downloadFile(src, dest, totalSize, totalTransferred) {
     const adbStream = await client.pull(mainProcessVars.deviceId, src);
     const fileStream = fs.createWriteStream(destPath);
     //Calcul du pourcentage de téléchargement du fichier en cours
-    let transferred = 0;
     adbStream.on('data', (chunk) => {
-      transferred += chunk.length;
       totalTransferred += chunk.length;
       const percentage = ((totalTransferred / totalSize) * 100).toFixed();
       console.log(percentage+'%');

@@ -32,12 +32,12 @@ function getVariable(variableName) {
 async function cleanDisplayedDirectories() {
   for(var i=0; i < receivedFileList.length; i++) {
     var ligne = document.getElementById(i);
-    if(ligne != null)
-    ligne.remove();
+    (ligne != null ? ligne.remove() : "");
   }
 }
 
 async function displayFiles(receivedFileList) {
+  await cleanDisplayedDirectories();
   var table = document.getElementById('files');
   var fileNames = {};
   for(var i=0; i < receivedFileList.length; i++) {
@@ -48,7 +48,6 @@ async function displayFiles(receivedFileList) {
     } else {
       fileNames[file.name] = true; // Ajout du nom du fichier
     }
-
     //EX: pas la même taille sur android et windows, un dossier de 825Mo android = 786Mo windows
     //Deux possibilités de calcul, sur android la taille est indiquée par 1000
     //Sur windows par 1024, j'ai choisi de faire pour windows
@@ -82,11 +81,7 @@ async function displayFiles(receivedFileList) {
     }
 
     //Date
-    let date = file.lastModified.toLocaleDateString("fr-FR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric"
-    });
+    let date = file.lastModified.toLocaleDateString("fr-FR", {day: "2-digit",month: "2-digit",year: "numeric"});
 
     let icon = "<img src='" + iconPath + "' alt='file' width='20' height='20'>"
     var htmlBlock;
@@ -95,6 +90,7 @@ async function displayFiles(receivedFileList) {
     var fileName;
     await getVariable('actualPath').then(path => {
       selectedPath = path + "/" + file.name; 
+      //Si fichier deja dans la liste des fichiers telechargés, on coche la case
       isChecked = (selectedPath in downloadedFilesList ? 'checked' : '');
       //Affichage du bouton retour ou du bouton select all
       (path == "/sdcard") ? changeWhatsDisplayed(document.getElementById('boutonRetour'),document.getElementById('boutonAllSelect'),'block') : changeWhatsDisplayed(document.getElementById('boutonAllSelect'),document.getElementById('boutonRetour'),'block');
@@ -117,9 +113,9 @@ async function displayFiles(receivedFileList) {
         });
         if (index !== -1 && receivedFileList[index].type === 'Dossier') {
           //loader animation
-          changeWhatsDisplayed(document.getElementById('files'), document.getElementById('fileLoader'),'inline-block');
           await cleanDisplayedDirectories();
           window.api.send('changePath', nom);
+          changeWhatsDisplayed(document.getElementById('files'), document.getElementById('fileLoader'),'inline-block');
         }
       }
     });
@@ -184,17 +180,29 @@ window.addEventListener('DOMContentLoaded', () => {
 
 //?  _________________________
 //? |___BUTTONS_LISTENERS____|
-
-  //Ajout du listener pour le bouton de retour
+  //*  _________________________
+  //* |________GO_BACK_________|
   var goBackButton = document.getElementById("boutonRetour");
   goBackButton.addEventListener('mouseup', async function(event) {
+    const circle = document.getElementById('circle');
+    const containerCircle = document.getElementById('containerCircle');
+    containerCircle.style.display = 'block';
+    circle.style.backgroundColor = '#e3dbdbe1';
+    circle.style.display = 'inline-block';
+    circle.addEventListener('animationend', () => {
+      circle.style.display = 'none';
+      containerCircle.style.display = 'none';
+    });
+    document.getElementById('boutonRetour').style.display = 'none';
     //loader animation
     changeWhatsDisplayed(document.getElementById('files'), document.getElementById('fileLoader'),'inline-block');
-    await cleanDisplayedDirectories();
-    window.api.send('changePath', 'goBack');
+    await cleanDisplayedDirectories().then(() => {
+      window.api.send('changePath', 'goBack');
+    });
   });
 
-  //Ajout du listener pour le bouton de sélection recommandée
+  //*  _________________________
+  //* |______RECOMMENDED_______|
   var recommendedButton = document.getElementById("boutonAllSelect");
   recommendedButton.addEventListener('mouseup', async function(event) {
     const circle = document.getElementById('circle');
@@ -223,15 +231,20 @@ window.addEventListener('DOMContentLoaded', () => {
     }
     document.getElementById('boutonDownload').style.display = 'inline-block';
     document.getElementById('boutonAnnuler').style.display = 'inline-block';
-    await cleanDisplayedDirectories();
-    displayFiles(receivedFileList);
+    await cleanDisplayedDirectories().then(() => {
+      displayFiles(receivedFileList);
+    });
     console.log("Fichiers à télécharger :", downloadedFilesList);
   });
 
-  //Ajout du listener pour le bouton rafraichir
+  //*  _________________________
+  //* |________REFRESH_________|
   var refreshButton = document.getElementById("boutonRefresh");
   refreshButton.addEventListener('mouseup', async function(event) {
-    window.api.send('refresh', true);
+    changeWhatsDisplayed(document.getElementById('files'),document.getElementById('fileLoader'),'inline-block');
+    await cleanDisplayedDirectories().then(() => {
+      window.api.send('refresh', true);
+    });
     const circle = document.getElementById('circle');
     const containerCircle = document.getElementById('containerCircle');
     containerCircle.style.display = 'block';
@@ -244,11 +257,10 @@ window.addEventListener('DOMContentLoaded', () => {
     downloadedFilesList = {};
     document.getElementById('boutonDownload').style.display = 'none';
     document.getElementById('boutonAnnuler').style.display = 'none';
-    await cleanDisplayedDirectories();
-    displayFiles(receivedFileList);
   });
 
-  //Ajout du listener pour le bouton annuler
+  //*  _________________________
+  //* |________CANCEL__________|
   var cancelButton = document.getElementById("boutonAnnuler");
   cancelButton.addEventListener('mouseup', async function(event) {
     const circle = document.getElementById('circle');
@@ -263,11 +275,13 @@ window.addEventListener('DOMContentLoaded', () => {
     downloadedFilesList = {};
     document.getElementById('boutonDownload').style.display = 'none';
     document.getElementById('boutonAnnuler').style.display = 'none';
-    await cleanDisplayedDirectories();
-    displayFiles(receivedFileList);
+    await cleanDisplayedDirectories().then(() => {
+      displayFiles(receivedFileList);
+    });
   });
 
-  //Ajout du listener pour le bouton telecharger
+  //*  _________________________
+  //* |________DOWNLOAD________|
   var isDownloading = false;
   var filePathButton = document.getElementById('boutonDownload');
   filePathButton.addEventListener('mouseup', async (event) => {
@@ -295,9 +309,9 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('progressPercentage').style.width = '0%';
   });
 
+
   //?  _________________________
   //? |_______EASTER_EGG_______|
-
   function setRandomBackgroundColor() {
     const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
     document.body.style.backgroundColor = randomColor;
@@ -320,25 +334,14 @@ window.addEventListener('DOMContentLoaded', () => {
   //Reception de la liste des fichiers
   window.api.receive('getFileList', async (arg) => { 
     receivedFileList = arg;
-    receivedFileList.sort(function(elementA, elementB) {
-      if (elementA.type === 'Dossier' && elementB.type !== 'Dossier') {
-        return -1;
-      } else if (elementA.type !== 'Dossier' && elementB.type === 'Dossier') {
-        return 1;
-      } else {
-        var nomFichier1 = elementA.name.toUpperCase();
-        var nomFichier2 = elementB.name.toUpperCase();
-        return (nomFichier1 < nomFichier2 ? (nomFichier1 == nomFichier2 ? 0:-1) : (nomFichier1 == nomFichier2 ? 0:1));
-      }
-    });
-    console.log(receivedFileList);
-    changeWhatsDisplayed(document.getElementById('fileLoader'), document.getElementById('files'),'');
   });
   //Reception de la variable wantsToUpdate
   window.api.receive('wantsToUpdate', async (arg) => {
     if(arg) {
-      await cleanDisplayedDirectories();
-      displayFiles(receivedFileList);
+      await cleanDisplayedDirectories().then(() => {
+        displayFiles(receivedFileList);
+        changeWhatsDisplayed(document.getElementById('fileLoader'), document.getElementById('files'),'');
+      });
     };
   });
 
