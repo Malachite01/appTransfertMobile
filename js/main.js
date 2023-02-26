@@ -70,7 +70,12 @@ adbDetection.checkAdb()
         client = adbkit.createClient({bin: 'C://adb/adb.exe'});
         //?  _________________________
         //? |____DEVICE_DETECTION____|
-        idUsbDetection = setInterval(() => {usbDetection.trackDevices().then((id) => {deviceId = id;});}, 2000);
+        idUsbDetection = setInterval(() => {
+          usbDetection.trackDevices().then((id) => {
+            deviceId = id;
+            mainProcessVars.deviceId = deviceId;
+          });
+        }, 2000);
       }
     }
   );
@@ -165,13 +170,13 @@ async function fileAlreadyExist(file) {
 let idDeviceDetection;
 idDeviceDetection = setInterval(() => {
   if (!mainProcessVars.isAdbInstalled || deviceId == null) {
+    directoryIsRead = false;
     mainProcessVars.deviceId = null;
     return;
   } else if (directoryIsRead) {
     return;
   }
-
-  mainProcessVars.deviceId = deviceId;
+  
   fileList = [];
 
   client.listDevices()

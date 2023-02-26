@@ -183,7 +183,10 @@ async function displayFiles(receivedFileList) {
 window.addEventListener('DOMContentLoaded', () => {
   //Changement de mode nuit ou non en fonction de l'heure
   const hours = new Date().getHours();
-  (hours > 7 && hours < 20 ? document.getElementById('toggle').checked = false : document.getElementById('toggle').checked = true, toggleDarkMode());
+  if(hours < 7 && hours > 20) {
+    document.getElementById('toggle').checked = true; 
+    toggleDarkMode();
+  }
 
   //Update du renderer pour adbInstalled
   idUpdateRendererADB = setInterval(() => {
@@ -205,6 +208,7 @@ window.addEventListener('DOMContentLoaded', () => {
     //Affichage du wrapperFiles
     getVariable('deviceId').then(result => {
       receivedDeviceId = result;
+      console.log(receivedDeviceId);
       if (typeof receivedDeviceId === 'string' && receivedDeviceId.length > 0 && !isDownloading) {
           (wrapperIdle.style.display == 'block' ? changeWhatsDisplayed(wrapperIdle, wrapperFiles, 'grid') : "");
       } else {
@@ -213,7 +217,7 @@ window.addEventListener('DOMContentLoaded', () => {
         (wrapperFiles.style.display == 'grid' ? changeWhatsDisplayed(wrapperFiles, wrapperIdle, 'block') : "");
       }
     });
-  }, 1900);
+  }, 1500);
 
 
 //?  _________________________
