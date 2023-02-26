@@ -20,7 +20,6 @@ function swapStyleSheet(sheet) {
 function toggleDarkMode() {
   console.log('toggleDarkMode');
   const pageStyle = document.getElementById("pageStyle");
-  oldBackgroundColor = document.body.style.backgroundColor;
   // Check if the light mode style sheet is currently active
   if (pageStyle.getAttribute("href") == "style/blanc.css") {
     const circle = document.getElementById('circle');
@@ -32,6 +31,7 @@ function toggleDarkMode() {
       circle.style.display = 'none';
       containerCircle.style.display = 'none';
     });
+    oldBackgroundColor = "#212121";
     swapStyleSheet("style/noir.css")
   } else {
     const circle = document.getElementById('circle');
@@ -43,6 +43,7 @@ function toggleDarkMode() {
       circle.style.display = 'none';
       containerCircle.style.display = 'none';
     });
+    oldBackgroundColor = "#fff";
     swapStyleSheet("style/blanc.css")
   }
 }
