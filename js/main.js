@@ -275,6 +275,7 @@ async function countFiles(files) {
   return count;
 }
 
+let errorDownload = false;
 // Fonction de téléchargement d'un fichier
 async function downloadFile(src, dest, totalSize, totalTransferred) {
   try {
@@ -341,12 +342,9 @@ async function downloadFolder(src, dest, totalSize, totalTransferred) {
   }
 }
 
-let errorDownload = false;
 //Fonction de téléchargement
 async function download(src, dest) {
   try {
-    src = src.toString('utf-8');
-    console.log(src);
     const stat = await client.stat(mainProcessVars.deviceId, src);
     let totalSize = stat.size || 0;
     let totalTransferred = 0;
