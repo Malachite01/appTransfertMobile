@@ -112,37 +112,40 @@ ipcMain.on('changePath', (event, arg) => {
 
 
 //fonction qui renvoie le type d'un fichier
-function getFileType(file, type) {
-  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.tiff', '.cr2', '.arw', '.nef', '.raw'];
-  const videoExtensions = ['.mp4', '.avi', '.mov', '.wmv', '.mkv', '.webm', '.flv', '.3gp', '.m4v','.3g2', '.asf', '.avchd', '.f4v', '.m2ts', '.mpe', '.mpeg', '.mpg', '.mts', '.tod', '.ts', '.vob'];
-  const soundExtensions = ['.mp3', '.wav', '.aiff', '.aac', '.flac', '.alac', '.dsd', '.wma', '.ogg', '.m4a'];
-  if(type == "Affichage") {
-    if (file.isFile()) {
-      if (imageExtensions.some(extension => file.name.endsWith(extension))) {
-        return 'Image';
-      } else if(videoExtensions.some(extension => file.name.endsWith(extension))) {
-        return 'Video';
-      } else if(soundExtensions.some(extension => file.name.endsWith(extension))) {
-        return 'Sons';
-      } else {
-        return 'Fichier';
-      }
-    } else if(file.isDirectory()) {
-      return 'Dossier';
-    } else {
-      return 'Inconnu';
-    }
-  } else if(type == "Téléchargement") {
-    if(imageExtensions.some(extension => path.extname(file) === extension)) {
-      return 'Images';
-    } else if(videoExtensions.some(extension => path.extname(file) === extension)) {
-      return 'Videos';
-    } else if(soundExtensions.some(extension => path.extname(file) === extension)) {
-      return 'Sons';
-    } else {
-      return 'Fichiers';
-    }
-  }
+function getFileType(file, type) { 
+  const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.tiff', '.cr2', '.arw', '.nef', '.raw']; 
+  const videoExtensions = ['.mp4', '.avi', '.mov', '.wmv', '.mkv', '.webm', '.flv', '.3gp', '.m4v','.3g2', '.asf', '.avchd', '.f4v', '.m2ts', '.mpe', '.mpeg', '.mpg', '.mts', '.tod', '.ts', '.vob']; 
+  const soundExtensions = ['.mp3', '.wav', '.aiff', '.aac', '.flac', '.alac', '.dsd', '.wma', '.ogg', '.m4a']; 
+
+  if (type == "Affichage") { 
+    if (file.isFile()) { 
+      const fileExtension = file.name.slice(file.name.lastIndexOf('.')).toLowerCase();
+      if (imageExtensions.some(extension => fileExtension.endsWith(extension.toLowerCase()))) { 
+        return 'Image'; 
+      } else if (videoExtensions.some(extension => fileExtension.endsWith(extension.toLowerCase()))) { 
+        return 'Video'; 
+      } else if (soundExtensions.some(extension => fileExtension.endsWith(extension.toLowerCase()))) { 
+        return 'Sons'; 
+      } else { 
+        return 'Fichier'; 
+      } 
+    } else if (file.isDirectory()) { 
+      return 'Dossier'; 
+    } else { 
+      return 'Inconnu'; 
+    } 
+  } else if (type == "Téléchargement") { 
+    const fileExtension = path.extname(file).toLowerCase();
+    if (imageExtensions.some(extension => fileExtension === extension.toLowerCase())) { 
+      return 'Images'; 
+    } else if (videoExtensions.some(extension => fileExtension === extension.toLowerCase())) { 
+      return 'Videos'; 
+    } else if (soundExtensions.some(extension => fileExtension === extension.toLowerCase())) { 
+      return 'Sons'; 
+    } else { 
+      return 'Fichiers'; 
+    } 
+  } 
 }
 
 async function getFileSize(deviceId, path) {
@@ -332,6 +335,7 @@ async function downloadFolder(src, dest, totalSize, totalTransferred) {
   }
 }
 
+let errorDownload = false;
 //Fonction de téléchargement
 async function download(src, dest) {
   try {
@@ -344,7 +348,12 @@ async function download(src, dest) {
       await downloadFile(src, dest, totalSize, totalTransferred);
     }
   } catch (err) {
-    console.error(`Error downloading ${src}: ${err.message}`);
+    if(!errorDownload) {
+      console.error(`Error downloading ${src}: ${err.message}`);
+      win.webContents.send('finishedDownloading', false);
+      console.log('Donwload canceled');
+      errorDownload = true;
+    }
   }
 }
 
@@ -368,10 +377,12 @@ ipcMain.on('filesToDownload', async (event, arg) => {
     for (let src of filesToDownload) {
       await download(src, destPath);
     }
-    console.log('Download completed!');
+
     win.webContents.send('finishedDownloading', true);
+    console.log('Download completed!');
     win.webContents.send('getFileList', fileList);
     downloadedCount = 0;
+    errorDownload = false;
   } catch (err) {
     console.error(err);
   }

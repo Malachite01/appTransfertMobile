@@ -346,11 +346,19 @@ window.addEventListener('DOMContentLoaded', () => {
   });
   //fin du téléchargement
   window.api.receive('finishedDownloading', async (arg) => {
-    alert('Téléchargement terminé !');
-    changeWhatsDisplayed(wrapperDownloading, wrapperFiles, 'grid');
-    changeWhatsDisplayed(document.getElementById('fileLoader'), document.getElementById('files'),'');
-    isDownloading = false;
-    document.getElementById('progressPercentage').style.width = '0%';
+    if(arg) {
+      alert('Téléchargement terminé !');
+      changeWhatsDisplayed(wrapperDownloading, wrapperFiles, 'grid');
+      changeWhatsDisplayed(document.getElementById('fileLoader'), document.getElementById('files'),'');
+      isDownloading = false;
+      document.getElementById('progressPercentage').style.width = '0%';
+    } else {
+      alert('Erreur lors du téléchargement. Veuillez réessayer.');
+      changeWhatsDisplayed(wrapperDownloading, wrapperFiles, 'grid');
+      changeWhatsDisplayed(document.getElementById('fileLoader'), document.getElementById('files'),'');
+      isDownloading = false;
+      document.getElementById('progressPercentage').style.width = '0%';
+    }
   });
 
   //*  _________________________
