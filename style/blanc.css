@@ -1,0 +1,25 @@
+:root {
+  --scroll-track: #00000022;
+  --scroll-thumb: rgba(0, 0, 0, 0.205);
+  --scroll-hover: rgba(0, 0, 0, 0.364);
+  --scroll-active: rgba(0, 0, 0, 0.551);
+  --couleur-body: white;
+  --light-gray: lightgray;
+  --grey: grey;
+  --box-shadow-logo: rgba(41, 40, 40, 0.878) 0px 48px 100px 0px;
+  --adb-wave-color: rgb(234, 217, 103);
+  --box-shadow2: rgba(41, 40, 40, 0.9) 0px 28px 65px 0px; 
+  --box-shadow3: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+  --box-shadow4: rgba(0, 0, 0, 0.18) 0px 3px 8px;
+  --td-color: rgb(228, 228, 228);
+  --toggle-point-color: #fff;
+  --toggle-background-off: rgb(178, 176, 176);
+  --box-shadow-toggle-background: rgba(252, 252, 252, 0.138) 0px 30px 60px -12px inset, rgba(255, 255, 255, 0.193) 0px 18px 36px -18px inset;
+  --box-shadow-toggle: rgba(17, 17, 26, 0.1) 0px 2px 0px;
+  --toggle-background-on: #398bd6;
+  --box-shadow-toggle-on: rgba(252, 252, 252, 0.138) 0px 30px 60px -12px inset, rgba(255, 255, 255, 0.193) 0px 18px 36px -18px inset;
+  --box-shadow-buttons: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+  --color-spinner-loader: #c1bcbc;
+  --text: black;
+  --color-buttons: #fff;
+}

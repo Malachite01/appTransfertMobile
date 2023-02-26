@@ -13,6 +13,39 @@ var downloadedFilesList = {};
 
 //!  _________________________
 //! |_______FUNCTIONS________|
+function swapStyleSheet(sheet) {
+  document.getElementById("pageStyle").setAttribute("href", sheet);  
+}
+
+function toggleDarkMode() {
+  console.log('toggleDarkMode');
+  const pageStyle = document.getElementById("pageStyle");
+  // Check if the light mode style sheet is currently active
+  if (pageStyle.getAttribute("href") == "style/blanc.css") {
+    const circle = document.getElementById('circle');
+    const containerCircle = document.getElementById('containerCircle');
+    containerCircle.style.display = 'block';
+    circle.style.backgroundColor = '#bfbfc4';
+    circle.style.display = 'inline-block';
+    circle.addEventListener('animationend', () => {
+      circle.style.display = 'none';
+      containerCircle.style.display = 'none';
+    });
+    swapStyleSheet("style/noir.css")
+  } else {
+    const circle = document.getElementById('circle');
+    const containerCircle = document.getElementById('containerCircle');
+    containerCircle.style.display = 'block';
+    circle.style.backgroundColor = '#252527';
+    circle.style.display = 'inline-block';
+    circle.addEventListener('animationend', () => {
+      circle.style.display = 'none';
+      containerCircle.style.display = 'none';
+    });
+    swapStyleSheet("style/blanc.css")
+  }
+}
+
 function changeWhatsDisplayed(screen1, screen2,type) {
   screen1.style.display = 'none';
   screen2.style.display = type;
@@ -83,7 +116,7 @@ async function displayFiles(receivedFileList) {
     //Date
     let date = file.lastModified.toLocaleDateString("fr-FR", {day: "2-digit",month: "2-digit",year: "numeric"});
 
-    let icon = "<img src='" + iconPath + "' alt='file' width='20' height='20'>"
+    let icon = "<img class='iconeFichier' src='" + iconPath + "' alt='file' width='20' height='20'>"
     var htmlBlock;
     var selectedPath;
     var isChecked = "";
@@ -305,11 +338,14 @@ window.addEventListener('DOMContentLoaded', () => {
   window.api.receive('finishedDownloading', async (arg) => {
     alert('Téléchargement terminé !');
     changeWhatsDisplayed(wrapperDownloading, wrapperFiles, 'grid');
+    changeWhatsDisplayed(document.getElementById('fileLoader'), document.getElementById('files'),'');
     isDownloading = false;
     document.getElementById('progressPercentage').style.width = '0%';
   });
 
-
+  //*  _________________________
+  //* |_______NIGHT_MODE_______|
+  document.getElementById('toggle').addEventListener('change', toggleDarkMode);
   //?  _________________________
   //? |_______EASTER_EGG_______|
   function setRandomBackgroundColor() {

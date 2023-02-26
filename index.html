@@ -5,8 +5,15 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
     <title>Transfert de fichier</title>
     <link rel="stylesheet" href="style/style.css">
+    <link id="pageStyle" rel="stylesheet" href="style/blanc.css" title="light-mode">
   </head>
   <body>
+    <div id="containerCircle">
+      <div id="circle"></div>
+    </div>
+    <div id="containerToggleDarkMode">
+      <input id="toggle" class="toggle" type="checkbox">
+    </div>
     <div id="wrapper-idle">
       <img src="./images/usb.png" alt="logo usb" id="imgUsb">
       <span id="idleWave"></span>
@@ -20,9 +27,6 @@
     </div>
 
     <div id="wrapper-files">
-      <div id="containerCircle">
-        <div id="circle"></div>
-      </div>
       <!-- logo -->
       <div>
         <img src="./images/usb.png" alt="logo usb" class="logo-anim">

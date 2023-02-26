@@ -159,7 +159,6 @@ async function fileAlreadyExist(file) {
   return fileList.some(f => f.name === file.name);
 }
 
-
 //?  _________________________
 //? |_____BEGIN_DIR_LIST_____|
 
@@ -291,7 +290,6 @@ async function downloadFile(src, dest, totalSize, totalTransferred) {
     adbStream.on('data', (chunk) => {
       totalTransferred += chunk.length;
       const percentage = ((totalTransferred / totalSize) * 100).toFixed();
-      console.log(percentage+'%');
       win.webContents.send('changeDownloadPercentage', [percentage,fileName,downloadedCount]);
     });
     //Téléchargement du fichier et transfert dans le dossier de destination
