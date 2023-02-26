@@ -20,6 +20,7 @@ function swapStyleSheet(sheet) {
 function toggleDarkMode() {
   console.log('toggleDarkMode');
   const pageStyle = document.getElementById("pageStyle");
+  oldBackgroundColor = document.body.style.backgroundColor;
   // Check if the light mode style sheet is currently active
   if (pageStyle.getAttribute("href") == "style/blanc.css") {
     const circle = document.getElementById('circle');
@@ -348,6 +349,7 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('toggle').addEventListener('change', toggleDarkMode);
   //?  _________________________
   //? |_______EASTER_EGG_______|
+  var oldBackgroundColor;
   function setRandomBackgroundColor() {
     const randomColor = '#' + Math.floor(Math.random()*16777215).toString(16);
     document.body.style.backgroundColor = randomColor;
@@ -358,10 +360,11 @@ window.addEventListener('DOMContentLoaded', () => {
   eaButton.addEventListener('click',  (event) => {
     eaCounter++;
     if(eaCounter == 10) {
+      oldBackgroundColor = document.body.style.backgroundColor;
       idEa = setInterval(setRandomBackgroundColor, 100);
     } else if(eaCounter > 10){
       clearInterval(idEa);
-      document.body.style.backgroundColor = "#ffffff";
+      document.body.style.backgroundColor = oldBackgroundColor;
       eaCounter = 0;
     }
   });
