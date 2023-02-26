@@ -310,7 +310,13 @@ async function downloadFile(src, dest, totalSize, totalTransferred) {
       adbStream.on('error', reject);
     });
   } catch (err) {
-    console.error(`Erreur pour le fichier ${src}: ${err.message}`);
+    if (err.message.includes('Premature end') || err.message.includes('Failure')) {
+      console.error('Download canceled');
+      win.webContents.send('finishedDownloading', false);
+      errorDownload = true;
+    } else {
+      console.error(`Erreur pour le fichier ${src}: ${err.message}`);
+    }
   }
 }
 
@@ -339,6 +345,8 @@ let errorDownload = false;
 //Fonction de téléchargement
 async function download(src, dest) {
   try {
+    src = src.toString('utf-8');
+    console.log(src);
     const stat = await client.stat(mainProcessVars.deviceId, src);
     let totalSize = stat.size || 0;
     let totalTransferred = 0;
@@ -348,12 +356,7 @@ async function download(src, dest) {
       await downloadFile(src, dest, totalSize, totalTransferred);
     }
   } catch (err) {
-    if(!errorDownload) {
-      console.error(`Error downloading ${src}: ${err.message}`);
-      win.webContents.send('finishedDownloading', false);
-      console.log('Donwload canceled');
-      errorDownload = true;
-    }
+    console.error(`Error downloading ${src}: ${err.message}`);
   }
 }
 
@@ -377,9 +380,10 @@ ipcMain.on('filesToDownload', async (event, arg) => {
     for (let src of filesToDownload) {
       await download(src, destPath);
     }
-
-    win.webContents.send('finishedDownloading', true);
-    console.log('Download completed!');
+    if(!errorDownload) {
+      win.webContents.send('finishedDownloading', true);
+      console.log('Download completed!');
+    }
     win.webContents.send('getFileList', fileList);
     downloadedCount = 0;
     errorDownload = false;

@@ -132,7 +132,8 @@ async function displayFiles(receivedFileList) {
       //Affichage du chemin actuel
       document.getElementById('actualPath').textContent = path;
     });
-    (taille == "0 o" ? fileName = "empty" : fileName = "fileName");
+    fileName = "fileName"
+    // (taille == "0 o" ? fileName = "empty" : fileName = "fileName");
     htmlBlock = "<tr id='"+i+"'><td><input type='checkbox' id='switch"+i+"' "+isChecked+"><label for='switch"+i+"'>Toggle</label></td><td>"+icon+"</td><td class='"+fileName+"'>"+file.name+"</td><td>"+taille+"</td><td>"+date+"</td></tr>";
 
     //!Ajout de la ligne 
