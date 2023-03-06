@@ -39,7 +39,8 @@ function createWindow () {
     }
   })
   win.loadFile(path.join(__dirname, '../index.html'));
-  // win.removeMenu();
+  win.removeMenu();
+  win.setIcon(path.join(__dirname, '../images/logo-wizard.png'));
 }
 // Lorsque l'application est prête, créer une fenêtre
 app.whenReady().then(() => {
@@ -250,7 +251,6 @@ ipcMain.on('refresh', async (event, arg) => {
 
 //?  _________________________
 //? |_DIR_SELECTION/DOWNLOAD_|
-let downloadedCount = 0;
 
 // Fonction qui permet de compter le nombre de fichiers a télécharger
 async function countFiles(files) {
@@ -275,7 +275,62 @@ async function countFiles(files) {
   return count;
 }
 
+async function countFile(src, count) {
+  try {
+    const stat = await client.stat(mainProcessVars.deviceId, src);
+    if (!stat.isFile()) {
+      console.error(`Erreur: ${src} n'est pas un fichier`);
+      return;
+    }
+    count++;
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      console.error(`Error counting files for ${file}: ${err.message}`);
+    }
+  }
+  return count;
+}
+
+async function countFolder(src, count) {
+  try {
+    const files = await client.readdir(mainProcessVars.deviceId, src);
+    for (let file of files) {
+      const srcPath = `${src}/${file.name}`;
+      if (file.isDirectory()) {
+        count = await countFolder(srcPath, count);
+      } else {
+        count = await countFile(srcPath, count);
+      }
+    }
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      console.error(`Error counting folder for ${file}: ${err.message}`);
+    }
+  }
+  return count;
+}
+
+async function count(files) {
+  let count = 0;
+  try {
+    for (let src of files) {
+      const stat = await client.stat(mainProcessVars.deviceId, src);
+      if (stat.isDirectory()) {
+        count = await countFolder(src, count);
+      } else {
+        count = await countFile(src, count);
+      }
+    }
+  } catch (err) {
+    if (err.code !== 'ENOENT') {
+      console.error(`Error counting ${src}: ${err.message}`);
+    }
+  }
+  return count;
+}
+
 let errorDownload = false;
+let downloadedCount = 0;
 // Fonction de téléchargement d'un fichier
 async function downloadFile(src, dest, totalSize, totalTransferred) {
   try {
@@ -343,15 +398,17 @@ async function downloadFolder(src, dest, totalSize, totalTransferred) {
 }
 
 //Fonction de téléchargement
-async function download(src, dest) {
+async function download(filesToDownload, dest) {
   try {
-    const stat = await client.stat(mainProcessVars.deviceId, src);
-    let totalSize = stat.size || 0;
-    let totalTransferred = 0;
-    if (stat.isDirectory()) {
-      await downloadFolder(src, dest, totalSize, totalTransferred);
-    } else {
-      await downloadFile(src, dest, totalSize, totalTransferred);
+    for (let src of filesToDownload) {
+      const stat = await client.stat(mainProcessVars.deviceId, src);
+      let totalSize = stat.size || 0;
+      let totalTransferred = 0;
+      if (stat.isDirectory()) {
+        await downloadFolder(src, dest, totalSize, totalTransferred);
+      } else {
+        await downloadFile(src, dest, totalSize, totalTransferred);
+      }
     }
   } catch (err) {
     console.error(`Error downloading ${src}: ${err.message}`);
@@ -362,7 +419,7 @@ async function download(src, dest) {
 ipcMain.on('filesToDownload', async (event, arg) => {
   let destPath = '';
   filesToDownload = Object.keys(arg);
-  var totalFileNb = await countFiles(filesToDownload);
+  var totalFileNb = await count(filesToDownload);
   //Envoie du nb de fichiers a télécharger
   win.webContents.send('nbOfFiles', totalFileNb);
   //Choix du répertoire de destination
@@ -375,9 +432,8 @@ ipcMain.on('filesToDownload', async (event, arg) => {
     }
   }
   try {
-    for (let src of filesToDownload) {
-      await download(src, destPath);
-    }
+    await download(filesToDownload, destPath);
+
     if(!errorDownload) {
       win.webContents.send('finishedDownloading', true);
       console.log('Download completed!');

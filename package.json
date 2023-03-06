@@ -1,13 +1,13 @@
 {
-  "name": "applicationtransfert",
+  "name": "sync-wizard",
   "version": "1.0.0",
-  "description": "An application made to easily transfer files from a mobile phone to a computer.",
+  "description": "An application made to easily transfer files, and order them, from an android mobile phone to a computer.",
   "main": "./js/main.js",
   "scripts": {
     "start": "electron .",
-    "test": "echo \"Error: no test specified\" && exit 1",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "build": "electron-builder"
   },
   "repository": {
     "type": "git",
@@ -16,6 +16,37 @@
   "keywords": [],
   "author": "Mathieu Antunes",
   "license": "ISC",
+  "build": {
+    "appId": "com.MathieuAntunes.SyncWizard",
+    "productName": "SyncWizard",
+    "directories": {
+      "output": "build"
+    },
+    "mac": {
+      "category": "Utilities"
+    },
+    "win": {
+        "target": "nsis",
+        "icon": "images/logo-wizard.ico"
+    },
+    "linux": {
+        "target": "AppImage",
+        "icon": "images/logo-wizard.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowElevation": true,
+      "allowToChangeInstallationDirectory": false,
+      "installerIcon": "images/logo-wizard.ico",
+      "uninstallerIcon": "images/logo-wizard.ico",
+      "installerHeaderIcon": "images/logo-wizard.ico",
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "SyncWizard",
+      "deleteAppDataOnUninstall": true
+    }
+  },
   "bugs": {
     "url": "https://github.com/Malachite01/appTransfertMobile/issues"
   },
@@ -26,7 +57,9 @@
     "@electron-forge/maker-rpm": "^6.0.5",
     "@electron-forge/maker-squirrel": "^6.0.5",
     "@electron-forge/maker-zip": "^6.0.5",
-    "electron": "^22.0.2"
+    "electron": "^22.0.2",
+    "electron-builder": "^23.6.0",
+    "electron-rebuilder": "^0.0.20"
   },
   "dependencies": {
     "adbkit": "^2.11.1",
@@ -34,8 +67,9 @@
     "child_process": "^1.0.2",
     "electron-squirrel-startup": "^1.0.0",
     "fs": "^0.0.1-security",
-    "node-sass": "^8.0.0",
-    "remote": "^0.2.6",
-    "usb": "^2.6.0"
+    "gyp": "^0.5.0",
+    "make": "^0.8.1",
+    "node-gyp": "^9.3.1",
+    "node-sass": "^8.0.0"
   }
 }

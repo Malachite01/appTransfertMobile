@@ -132,8 +132,7 @@ async function displayFiles(receivedFileList) {
       //Affichage du chemin actuel
       document.getElementById('actualPath').textContent = path;
     });
-    fileName = "fileName"
-    // (taille == "0 o" ? fileName = "empty" : fileName = "fileName");
+    (taille == "0 o" ? fileName = "empty" : fileName = "fileName");
     htmlBlock = "<tr id='"+i+"'><td><input type='checkbox' id='switch"+i+"' "+isChecked+"><label for='switch"+i+"'>Toggle</label></td><td>"+icon+"</td><td class='"+fileName+"'>"+file.name+"</td><td>"+taille+"</td><td>"+date+"</td></tr>";
 
     //!Ajout de la ligne 
@@ -185,7 +184,7 @@ async function displayFiles(receivedFileList) {
 window.addEventListener('DOMContentLoaded', () => {
   //Changement de mode nuit ou non en fonction de l'heure
   const hours = new Date().getHours();
-  if(hours < 7 && hours > 20) {
+  if(hours < 7 || hours > 20) {
     document.getElementById('toggle').checked = true; 
     toggleDarkMode();
   }
