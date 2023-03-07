@@ -22,16 +22,22 @@
     "directories": {
       "output": "build"
     },
+    "extraResources": [
+      {
+        "from": "adb-setup-1.4.4.exe",
+        "to": "."
+      }
+    ],
     "mac": {
       "category": "Utilities"
     },
     "win": {
-        "target": "nsis",
-        "icon": "images/logo-wizard.ico"
+      "target": "nsis",
+      "icon": "images/logo-wizard.ico"
     },
     "linux": {
-        "target": "AppImage",
-        "icon": "images/logo-wizard.png"
+      "target": "AppImage",
+      "icon": "images/logo-wizard.png"
     },
     "nsis": {
       "oneClick": false,
@@ -39,7 +45,7 @@
       "allowElevation": true,
       "allowToChangeInstallationDirectory": false,
       "installerIcon": "images/logo-wizard.ico",
-      "uninstallerIcon": "images/logo-wizard.ico",
+      "uninstallerIcon": "images/logo-wizard-uninstall.ico",
       "installerHeaderIcon": "images/logo-wizard.ico",
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
@@ -65,6 +71,7 @@
     "adbkit": "^2.11.1",
     "bluebird": "^3.7.2",
     "child_process": "^1.0.2",
+    "electron-log": "^5.0.0-beta.16",
     "electron-squirrel-startup": "^1.0.0",
     "fs": "^0.0.1-security",
     "gyp": "^0.5.0",

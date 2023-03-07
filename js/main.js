@@ -5,6 +5,7 @@ const path = require('path');
 const adbkit = require('adbkit');
 const fs = require('fs');
 const Promise = require('bluebird');
+const log = require('electron-log');
 let win;
 const adbDetection = require('./adb-detection.js');
 const usbDetection = require('./usb-detection.js');
@@ -226,6 +227,7 @@ idDeviceDetection = setInterval(() => {
       });
     })
     .catch(function(err) {
+      log.error(err.stack);
       console.error('Il y a eu un problème :', err.stack);
     });
 }, 2000);
@@ -268,6 +270,7 @@ async function countFiles(files) {
       }
     } catch (err) {
       if (err.code !== 'ENOENT') {
+        log.error(`Error counting files for ${file}: ${err.message}`);
         console.error(`Error counting files for ${file}: ${err.message}`);
       }
     }
@@ -279,12 +282,14 @@ async function countFile(src, count) {
   try {
     const stat = await client.stat(mainProcessVars.deviceId, src);
     if (!stat.isFile()) {
-      console.error(`Erreur: ${src} n'est pas un fichier`);
+      log.error(`Error: ${src} is not a file`);
+      console.error(`Error: ${src} is not a file`);
       return;
     }
     count++;
   } catch (err) {
     if (err.code !== 'ENOENT') {
+      log.error(`Error counting files for ${file}: ${err.message}`);
       console.error(`Error counting files for ${file}: ${err.message}`);
     }
   }
@@ -367,10 +372,12 @@ async function downloadFile(src, dest, totalSize, totalTransferred) {
     });
   } catch (err) {
     if (err.message.includes('Premature end') || err.message.includes('Failure')) {
+      log.error(`Download canceled`);
       console.error('Download canceled');
       win.webContents.send('finishedDownloading', false);
       errorDownload = true;
     } else {
+      log.error(`Erreur pour le fichier ${src}: ${err.message}`);
       console.error(`Erreur pour le fichier ${src}: ${err.message}`);
     }
   }
@@ -393,6 +400,7 @@ async function downloadFolder(src, dest, totalSize, totalTransferred) {
       }
     }
   } catch (err) {
+    log.error(`Error downloading folder ${src}: ${err.message}`);
     console.error(`Error downloading folder ${src}: ${err.message}`);
   }
 }
@@ -411,6 +419,7 @@ async function download(filesToDownload, dest) {
       }
     }
   } catch (err) {
+    log.error(`Error downloading ${src}: ${err.message}`);
     console.error(`Error downloading ${src}: ${err.message}`);
   }
 }
@@ -436,6 +445,7 @@ ipcMain.on('filesToDownload', async (event, arg) => {
 
     if(!errorDownload) {
       win.webContents.send('finishedDownloading', true);
+      log.info('Download completed!');
       console.log('Download completed!');
     }
     win.webContents.send('getFileList', fileList);
