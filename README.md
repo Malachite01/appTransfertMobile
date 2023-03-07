@@ -19,3 +19,6 @@ using a USB cable, and provides you with a simple interface to manage your files
 <br>&ensp;Once your selection is done, you can download the files selected by clicking the "Download" button at the bottom of the screen. You will then have to select a destination folder. Your files will then be downloaded and ordered into 4 different folders: Pictures, Videos, Sounds and Other. A progress bar of the download will then be displayed.
 
 <br>&ensp;In case of any error in the application, the refresh button could be useful. A night mode button is also always at the top right of the screen, and the night mode is automatically turned on or off according to the time.
+<br><br>
+
+<h2>Errors : </h2> &ensp;<br>In case of any error, logs can be found under "C:\Users\"username"\AppData\Roaming\sync-wizard\logs\main.log"
