@@ -23,3 +23,13 @@ using a USB cable, and provides you with a simple interface to manage your files
 <br><br>
 
 <h2><img src="https://user-images.githubusercontent.com/112857106/223549005-69b394a8-78bf-4a5a-b439-03d1f6fdf216.png" style="width: 30px">Errors : </h2> &ensp;<br>In case of any error, logs can be found under "C:\Users\"username"\AppData\Roaming\sync-wizard\logs\main.log". One common error is that you did not allow the computer's fingerprint on your phone, and that is why no files are appearing in the app. <a href="https://youtu.be/38lkOoL9Jqc">Here</a> is a tutorial to fix that.
+
+## Photos
+
+![image](https://github.com/Malachite01/appTransfertMobile/assets/112857106/8b94af74-c4ca-49d8-8668-cd5b9929aaa0)
+
+![image](https://github.com/Malachite01/appTransfertMobile/assets/112857106/db1b6901-0399-40cd-aca4-71448faa43f5)
+
+![image](https://github.com/Malachite01/appTransfertMobile/assets/112857106/fd604af4-32ec-466a-b55c-c70bb5ee0044)
+
+
