@@ -71,7 +71,7 @@
     "adbkit": "^2.11.1",
     "bluebird": "^3.7.2",
     "child_process": "^1.0.2",
-    "electron-log": "^5.0.0-beta.16",
+    "electron-log": "^5.1.4",
     "electron-squirrel-startup": "^1.0.0",
     "fs": "^0.0.1-security",
     "gyp": "^0.5.0",
